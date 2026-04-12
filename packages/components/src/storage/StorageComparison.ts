@@ -120,59 +120,69 @@ export class StorageComparison {
       startY += 65; 
     }
 
-    // Trigger Animation Race
+    // Trigger Animation Race (Continuous for 30 seconds)
     let isRacing = false;
+    const LOOP_DURATION = 30000; // 30 seconds
+
+    const runTokenCycle = (token: AnimatedRect, dev: any, endTime: number) => {
+      const distance = targetX - cpuX;
+      const velocity = distance / dev.speedMs;
+
+      // Phase 1: Move to target
+      token.moveTo(targetX - 35, tokenStartYs[dev.index], velocity);
+
+      // Schedule arrival at target
+      this.scene.scheduler.schedule({
+        id: `reach-${token.id}-${this.scene.clock.simTime}`,
+        triggerTime: this.scene.clock.simTime + dev.speedMs,
+        execute: () => {
+          token.x = targetX - 35;
+          // Phase 2: Move back to CPU
+          token.moveTo(cpuX, tokenStartYs[dev.index], velocity);
+
+          // Schedule arrival back at CPU
+          this.scene.scheduler.schedule({
+            id: `return-${token.id}-${this.scene.clock.simTime}`,
+            triggerTime: this.scene.clock.simTime + dev.speedMs,
+            execute: () => {
+              token.x = cpuX;
+              // Check if we should continue
+              if (this.scene.clock.simTime < endTime) {
+                runTokenCycle(token, dev, endTime);
+              } else {
+                this.scene.removeEntity(token.id);
+                activeTokens--;
+                if (activeTokens === 0) {
+                  isRacing = false;
+                  timeIOBtn.disabled = false;
+                  timeIOBtn.style.opacity = '1';
+                }
+              }
+            }
+          });
+        }
+      });
+    };
+
+    const tokenStartYs = devices.map((_, i) => 88 + (i * 65));
+    let activeTokens = 0;
+
     timeIOBtn.addEventListener('click', () => {
       if (isRacing) return;
       isRacing = true;
+      timeIOBtn.disabled = true;
+      timeIOBtn.style.opacity = '0.5';
 
-      // Spawn 4 colored tokens
-      let completed = 0;
+      const endTime = this.scene.clock.simTime + LOOP_DURATION;
+      activeTokens = devices.length;
 
       for (let i = 0; i < devices.length; i++) {
-          const dev = devices[i];
-          const id = `token-${i}`;
-          
-          // Token starting directly at the right edge of CPU
-          const tokenStartY = 88 + (i * 65);
-          const token = new AnimatedRect(id, cpuX, tokenStartY, 30, 30);
-          token.fillColor = dev.color;
-          this.scene.addEntity(token);
-
-          // Latency Race Logic:
-          // Speed = Distance / (dev.speedMs)
-          const distance = targetX - cpuX;
-          const velocity = distance / dev.speedMs;
-
-          // Phase 1: Move to target at constant velocity
-          token.moveTo(targetX - 35, tokenStartY, velocity);
-
-          // We check for arrival in update or use scheduler
-          // The scheduler triggers at the EXACT intended arrival time
-          this.scene.scheduler.schedule({
-             id: 'reach-' + id,
-             triggerTime: this.scene.clock.simTime + dev.speedMs,
-             execute: () => {
-                // Ensure it's snapped to target
-                token.x = targetX - 35;
-                
-                // Phase 2: Bounce back to CPU at same velocity
-                token.moveTo(cpuX, tokenStartY, velocity);
-
-                // Phase 3: Finish line
-                this.scene.scheduler.schedule({
-                   id: 'finish-' + id,
-                   triggerTime: this.scene.clock.simTime + (dev.speedMs * 2),
-                   execute: () => {
-                       this.scene.removeEntity(id);
-                       completed++;
-                       if (completed === devices.length) {
-                           isRacing = false;
-                       }
-                   }
-                });
-             }
-          });
+        const dev = { ...devices[i], index: i };
+        const id = `token-${i}`;
+        const token = new AnimatedRect(id, cpuX, tokenStartYs[i], 30, 30);
+        token.fillColor = dev.color;
+        this.scene.addEntity(token);
+        runTokenCycle(token, dev, endTime);
       }
     });
 
