@@ -94,15 +94,15 @@ export class StorageComparison {
 
     // 2. Storage tiers stacked on the right
     const devices = [
-      { id: 'l1', name: 'L1 Cache', latText: '(~1ns)', speedMs: 50, color: t.accent2 },    
-      { id: 'nvme', name: 'Local NVMe', latText: '(~20µs)', speedMs: 300, color: t.accent1 },     
-      { id: 'sata', name: 'SATA SSD', latText: '(~1ms)', speedMs: 1200, color: t.accent4 },     
-      { id: 'hdd', name: 'HDD', latText: '(~10ms)', speedMs: 3000, color: t.accent3 },     
+      { id: 'l1', name: 'L1 Cache', latText: '(~1ns)', speedMs: 250, color: t.accent2 },    
+      { id: 'nvme', name: 'Local NVMe', latText: '(~20µs)', speedMs: 800, color: t.accent1 },     
+      { id: 'sata', name: 'SATA SSD', latText: '(~1ms)', speedMs: 2500, color: t.accent4 },     
+      { id: 'hdd', name: 'HDD', latText: '(~10ms)', speedMs: 6000, color: t.accent3 },     
     ];
 
-    const cpuX = 50 + 120; // More compact CPU
-    const spacing = 280; // Space between CPU and targets
-    const targetX = cpuX + spacing; 
+    const cpuRightEdge = 50 + 150; // CPU x + width
+    const targetX = cpuRightEdge + 280; // Distance to storage targets
+    const tokenWidth = 30;
     let startY = 80;
 
     const cards: AnimatedRect[] = [];
@@ -125,27 +125,27 @@ export class StorageComparison {
     const LOOP_DURATION = 30000; // 30 seconds
 
     const runTokenCycle = (token: AnimatedRect, dev: any, endTime: number) => {
-      const distance = targetX - cpuX;
+      const distance = targetX - cpuRightEdge - tokenWidth;
       const velocity = distance / dev.speedMs;
 
-      // Phase 1: Move to target
-      token.moveTo(targetX - 35, tokenStartYs[dev.index], velocity);
+      // Phase 1: Move to target (touching the left edge)
+      token.moveTo(targetX - tokenWidth, tokenStartYs[dev.index], velocity);
 
       // Schedule arrival at target
       this.scene.scheduler.schedule({
         id: `reach-${token.id}-${this.scene.clock.simTime}`,
         triggerTime: this.scene.clock.simTime + dev.speedMs,
         execute: () => {
-          token.x = targetX - 35;
-          // Phase 2: Move back to CPU
-          token.moveTo(cpuX, tokenStartYs[dev.index], velocity);
+          token.x = targetX - tokenWidth;
+          // Phase 2: Move back to CPU (touching the right edge)
+          token.moveTo(cpuRightEdge, tokenStartYs[dev.index], velocity);
 
           // Schedule arrival back at CPU
           this.scene.scheduler.schedule({
             id: `return-${token.id}-${this.scene.clock.simTime}`,
             triggerTime: this.scene.clock.simTime + dev.speedMs,
             execute: () => {
-              token.x = cpuX;
+              token.x = cpuRightEdge;
               // Check if we should continue
               if (this.scene.clock.simTime < endTime) {
                 runTokenCycle(token, dev, endTime);
@@ -179,7 +179,7 @@ export class StorageComparison {
       for (let i = 0; i < devices.length; i++) {
         const dev = { ...devices[i], index: i };
         const id = `token-${i}`;
-        const token = new AnimatedRect(id, cpuX, tokenStartYs[i], 30, 30);
+        const token = new AnimatedRect(id, cpuRightEdge, tokenStartYs[i], tokenWidth, 30);
         token.fillColor = dev.color;
         this.scene.addEntity(token);
         runTokenCycle(token, dev, endTime);
