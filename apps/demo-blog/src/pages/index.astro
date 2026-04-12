@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/vislab-page.astro';
+import { StorageComparison } from '@vislab/react';
+---
+
+<Layout title="Storage Latency Demo">
+  <p>Below is an interactive demonstration of storage latency mapping perfectly using island architecture.</p>
+  
+  <StorageComparison client:load />
+
+</Layout>

@@ -1,0 +1,11 @@
+<div class="vislab-embed" id="vislab-{{ include.id }}"></div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const container = document.getElementById('vislab-{{ include.id }}');
+    if (window.VisLab && window.VisLab['{{ include.component }}']) {
+      new window.VisLab['{{ include.component }}'](container);
+    } else {
+      container.innerHTML = '<p style="color:red">Failed to load visualization component: {{ include.component }}</p>';
+    }
+  });
+</script>

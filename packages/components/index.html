@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VisLab Demo</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    #demo-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="demo-container">
+    <h2>Storage Latency Comparison</h2>
+    <div id="storage-demo"></div>
+  </div>
+
+  <script src="./dist/index.global.js"></script>
+  <script>
+    // Initialize the widget
+    const container = document.getElementById('storage-demo');
+    new VisLab.StorageComparison(container);
+  </script>
+
+</body>
+</html>
