@@ -1,5 +1,4 @@
 import { Entity } from "../engine/Entity";
-import { themes } from "../themes";
 import { AnimatedRect } from "./AnimatedRect";
 
 export class QueueViz extends Entity {

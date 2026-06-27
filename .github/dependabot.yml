@@ -1,21 +1,15 @@
 # Dependabot version updates — security scanning runs daily via GitHub Advisory DB.
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Public npm registry is configured in .npmrc (Dependabot npm-registry entries
+# require authentication and cannot point at registry.npmjs.org without a token).
 
 version: 2
-
-# Force public npm registry (org defaults may route @scoped packages to GitHub Packages).
-registries:
-  npm-npmjs:
-    type: npm-registry
-    url: https://registry.npmjs.org
-    replaces-base: true
 
 updates:
   # ── npm (pnpm monorepo) ──────────────────────────────────────────────
   - package-ecosystem: npm
     directory: /
-    registries:
-      - npm-npmjs
     schedule:
       interval: weekly
       day: monday

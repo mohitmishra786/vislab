@@ -45,7 +45,6 @@ export class StorageComparison {
     cpuBlock.fillColor = t.surface;
     cpuBlock.label = "CPU";
     cpuBlock.labelColor = "#111";
-    const originalDraw = cpuBlock.draw.bind(cpuBlock);
     cpuBlock.draw = (ctx) => {
       ctx.save();
       ctx.fillStyle = cpuBlock.fillColor;
