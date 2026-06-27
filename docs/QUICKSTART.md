@@ -74,7 +74,9 @@ pnpm --filter @vislab/cli exec vislab build -o ./public/vislab
 **Custom element** (auto-registered by embed script):
 
 ```html
-<vislab-storage-comparison style="display:block;min-height:420px"></vislab-storage-comparison>
+<vislab-storage-comparison
+  style="display:block;min-height:420px"
+></vislab-storage-comparison>
 ```
 
 ---
@@ -90,7 +92,10 @@ gem "vislab-jekyll"
 In your layout `<head>`:
 
 ```html
-<script src="{{ '/assets/vislab/vislab-embed.min.js' | relative_url }}" defer></script>
+<script
+  src="{{ '/assets/vislab/vislab-embed.min.js' | relative_url }}"
+  defer
+></script>
 ```
 
 In a post:

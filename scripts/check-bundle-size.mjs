@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 /**
  * Post-build bundle size budget check (#31)
  */
 import { gzipSync } from "node:zlib";
-import { readFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..");
 

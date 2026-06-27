@@ -4,10 +4,7 @@ import chalk from "chalk";
 
 type Template = "jekyll" | "html" | "astro";
 
-export async function newCmd(
-  projectName: string,
-  opts: { template?: string },
-) {
+export async function newCmd(projectName: string, opts: { template?: string }) {
   const template = (opts.template ?? "jekyll") as Template;
   const dir = join(process.cwd(), projectName);
   await mkdir(dir, { recursive: true });

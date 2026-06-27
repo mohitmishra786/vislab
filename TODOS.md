@@ -7,18 +7,18 @@
 
 ## Current state (June 2026)
 
-| Layer | Status |
-|-------|--------|
-| Core engine (`@vislab/core`) | Done — Scene, SimClock, primitives, themes |
+| Layer                          | Status                                                          |
+| ------------------------------ | --------------------------------------------------------------- |
+| Core engine (`@vislab/core`)   | Done — Scene, SimClock, primitives, themes                      |
 | Widgets (`@vislab/components`) | 17 registered; **StorageComparison** flagship; others schematic |
-| Registry (`@vislab/registry`) | Done — single manifest for all adapters |
-| React / Web Components | Done — `VislabMount`, `data-vislab`, auto custom elements |
-| CLI | Done — `build`, `widget`, `preview`, `new` |
-| Studio | Partial — picker + preview + MDX copy |
-| Docs site | Minimal — registry list only |
-| CI | Lint, typecheck, test, build, e2e |
-| npm publish | Not yet |
-| Video export | PNG frames only |
+| Registry (`@vislab/registry`)  | Done — single manifest for all adapters                         |
+| React / Web Components         | Done — `VislabMount`, `data-vislab`, auto custom elements       |
+| CLI                            | Done — `build`, `widget`, `preview`, `new`                      |
+| Studio                         | Partial — picker + preview + MDX copy                           |
+| Docs site                      | Minimal — registry list only                                    |
+| CI                             | Lint, typecheck, test, build, e2e                               |
+| npm publish                    | Not yet                                                         |
+| Video export                   | PNG frames only                                                 |
 
 **Not release-ready.** Target pre-release only after widget fidelity + docs + quickstart validation.
 
@@ -42,6 +42,7 @@ Blocks first `npm` tag. Issues: [#3](https://github.com/mohitmishra786/vislab/is
 Required for public beta. Issues: [#5](https://github.com/mohitmishra786/vislab/issues/5)–[#31](https://github.com/mohitmishra786/vislab/issues/31)
 
 ### Platform
+
 - [ ] Registry `props` schema for all 17 widgets ([#16](https://github.com/mohitmishra786/vislab/issues/16))
 - [ ] Studio registry-driven property editor ([#17](https://github.com/mohitmishra786/vislab/issues/17))
 - [ ] Studio embed export tabs ([#18](https://github.com/mohitmishra786/vislab/issues/18))
@@ -51,6 +52,7 @@ Required for public beta. Issues: [#5](https://github.com/mohitmishra786/vislab/
 - [ ] Bundle size budget ([#31](https://github.com/mohitmishra786/vislab/issues/31))
 
 ### Widget fidelity
+
 - [ ] CpuPipeline flagship ([#19](https://github.com/mohitmishra786/vislab/issues/19))
 - [ ] CacheSimulator flagship ([#20](https://github.com/mohitmishra786/vislab/issues/20))
 - [ ] ProcessScheduler flagship ([#21](https://github.com/mohitmishra786/vislab/issues/21))
@@ -60,6 +62,7 @@ Required for public beta. Issues: [#5](https://github.com/mohitmishra786/vislab/
 - [ ] demo-blog all 17 widgets ([#29](https://github.com/mohitmishra786/vislab/issues/29))
 
 ### Docs & distribution
+
 - [ ] Starlight docs site ([#12](https://github.com/mohitmishra786/vislab/issues/12))
 - [ ] Live component gallery ([#13](https://github.com/mohitmishra786/vislab/issues/13))
 - [ ] API reference from JSDoc ([#14](https://github.com/mohitmishra786/vislab/issues/14))
@@ -98,4 +101,4 @@ Adding a widget: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-*Last updated: June 2026*
+_Last updated: June 2026_

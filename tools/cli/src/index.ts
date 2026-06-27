@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { buildCmd } from "./commands/build";
+import { exportCmd } from "./commands/export";
 import { newCmd } from "./commands/new";
 import { previewCmd } from "./commands/preview";
 import { widgetCmd } from "./commands/widget";
-import { exportCmd } from "./commands/export";
 
 const program = new Command();
 
@@ -19,11 +19,7 @@ program
   .command("new")
   .argument("<project-name>", "directory name for sample content")
   .description("Scaffold a starter project (jekyll, html, or astro)")
-  .option(
-    "-t, --template <name>",
-    "jekyll | html | astro",
-    "jekyll",
-  )
+  .option("-t, --template <name>", "jekyll | html | astro", "jekyll")
   .action(newCmd);
 
 program

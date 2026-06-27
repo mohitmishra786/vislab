@@ -1,9 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { resolve, join } from "node:path";
 import { spawn } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import chalk from "chalk";
-import { widgetCmd } from "./widget";
 import { resolveRepoRoot } from "../util/repoRoot";
+import { widgetCmd } from "./widget";
 
 function run(cmd: string, args: string[]): Promise<void> {
   return new Promise((res, rej) => {
