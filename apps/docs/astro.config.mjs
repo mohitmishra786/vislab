@@ -3,7 +3,11 @@ import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
+  output: "static",
   site: "https://vislab.dev",
+  vite: {
+    esbuild: { target: "es2022" },
+  },
   integrations: [
     react(),
     starlight({
@@ -26,7 +30,7 @@ export default defineConfig({
         },
         {
           label: "Components",
-          autogenerate: { directory: "components" },
+          items: [{ autogenerate: { directory: "components" } }],
         },
         {
           label: "Guides",

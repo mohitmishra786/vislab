@@ -11,7 +11,7 @@
   "dependencies": {
     "@vislab/registry": "workspace:*",
     "commander": "^11.1.0",
-    "zx": "^7.2.3",
+    "zx": "^8.8.5",
     "chalk": "^5.3.0"
   },
   "devDependencies": {

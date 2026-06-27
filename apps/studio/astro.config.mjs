@@ -1,7 +1,13 @@
 import react from "@astrojs/react";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  integrations: [react(), tailwind()],
+  output: "static",
+  site: "https://vislab.dev",
+  integrations: [react()],
+  vite: {
+    plugins: [tailwindcss()],
+    esbuild: { target: "es2022" },
+  },
 });

@@ -1,0 +1,46 @@
+name: Security audit
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Daily vulnerability scan (independent of Dependabot version-update schedule)
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  pnpm-audit:
+    name: pnpm audit (production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit production deps (fail on high/critical)
+        run: pnpm audit --prod --audit-level=high
+
+  dependabot-alerts:
+    name: Dependabot alert summary
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      security-events: read
+    steps:
+      - name: List open Dependabot alerts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count=$(gh api repos/${{ github.repository }}/dependabot/alerts?state=open --paginate -q 'length')
+          echo "Open Dependabot alerts: $count"
+          if [ "$count" -gt 0 ]; then
+            gh api "repos/${{ github.repository }}/dependabot/alerts?state=open&per_page=100" \
+              --paginate \
+              -q '.[] | "\(.number)\t\(.security_advisory.severity)\t\(.security_vulnerability.package.name)\t\(.security_vulnerability.first_patched_version.identifier // "none")"' \
+              | sort -t$'\t' -k2,2 -k1,1n
+          fi
