@@ -16,5 +16,14 @@
   },
   "dependencies": {
     "@vislab/core": "workspace:*"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitmishra786/vislab.git",
+    "directory": "packages/components"
+  },
+  "license": "MIT"
 }

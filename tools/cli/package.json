@@ -17,5 +17,14 @@
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitmishra786/vislab.git",
+    "directory": "tools/cli"
+  },
+  "license": "MIT"
 }
