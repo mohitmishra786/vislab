@@ -1,7 +1,9 @@
 import { VislabMount } from "@vislab/react";
-import type { VislabComponentEntry } from "@vislab/registry";
+import type { VislabComponentEntry, VislabPropSchema } from "@vislab/registry";
 import { vislabRegistry } from "@vislab/registry";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+type ExportTab = "mdx" | "html" | "jekyll" | "iframe";
 
 function buildMdxSnippet(
   entry: VislabComponentEntry,
@@ -27,9 +29,125 @@ function buildMdxSnippet(
 `;
 }
 
+function buildHtmlSnippet(
+  entry: VislabComponentEntry,
+  props: Record<string, unknown>,
+): string {
+  const filtered = Object.fromEntries(
+    Object.entries(props).filter(([, v]) => v !== undefined && v !== ""),
+  );
+  const hasProps = Object.keys(filtered).length > 0;
+  return `<div
+  data-vislab="${entry.globalName}"${
+    hasProps ? `\n  data-props='${JSON.stringify(filtered)}'` : ""
+  }
+  style="min-height: 420px; width: 100%;"
+></div>
+<!-- Requires vislab-embed.min.js in page head -->`;
+}
+
+function buildJekyllSnippet(
+  entry: VislabComponentEntry,
+  props: Record<string, unknown>,
+): string {
+  const filtered = Object.fromEntries(
+    Object.entries(props).filter(([, v]) => v !== undefined && v !== ""),
+  );
+  const propsAttr =
+    Object.keys(filtered).length > 0
+      ? ` props='${JSON.stringify(filtered)}'`
+      : "";
+  return `{% include vislab.html id="${entry.id}" component="${entry.globalName}"${propsAttr} %}`;
+}
+
+function buildIframeSnippet(entry: VislabComponentEntry): string {
+  return `<iframe
+  src="/vizlab/${entry.globalName}/index.html"
+  title="${entry.displayName}"
+  style="width: 100%; min-height: 480px; border: 1px solid #1e293b;"
+  loading="lazy"
+></iframe>`;
+}
+
+function parsePropValue(schema: VislabPropSchema, raw: string): unknown {
+  if (schema.type === "boolean") return raw === "true";
+  if (schema.type === "number") {
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  if (schema.type === "string[]") {
+    return raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return raw;
+}
+
+function formatPropValue(
+  value: unknown,
+  type: VislabPropSchema["type"],
+): string {
+  if (value === undefined) return "";
+  if (type === "string[]" && Array.isArray(value)) return value.join(",");
+  if (type === "boolean") return value ? "true" : "false";
+  return String(value);
+}
+
+function PropertyField({
+  schema,
+  value,
+  onChange,
+}: {
+  schema: VislabPropSchema;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  const id = `prop-${schema.name}`;
+  if (schema.type === "boolean") {
+    return (
+      <label className="flex items-center gap-2 text-sm text-slate-300">
+        <input
+          id={id}
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(e) => onChange(e.target.checked)}
+          className="rounded border-slate-600"
+        />
+        {schema.name}
+      </label>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-xs font-semibold text-slate-400">
+        {schema.name}
+        {schema.optional && (
+          <span className="text-slate-600 font-normal"> (optional)</span>
+        )}
+      </label>
+      {schema.description && (
+        <span className="text-[10px] text-slate-600">{schema.description}</span>
+      )}
+      <input
+        id={id}
+        type={schema.type === "number" ? "number" : "text"}
+        value={formatPropValue(value, schema.type)}
+        onChange={(e) => onChange(parsePropValue(schema, e.target.value))}
+        className="bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 font-mono"
+      />
+    </div>
+  );
+}
+
 export default function StudioWorkbench() {
-  const [selectedId, setSelectedId] = useState(vislabRegistry[0]?.id ?? "");
-  const [stagesText, setStagesText] = useState("IF,ID,EX,MEM,WB");
+  const [selectedId, setSelectedId] = useState(() => {
+    if (typeof window === "undefined") return vislabRegistry[0]?.id ?? "";
+    const p = new URLSearchParams(window.location.search);
+    return p.get("component") ?? vislabRegistry[0]?.id ?? "";
+  });
+  const [propValues, setPropValues] = useState<Record<string, unknown>>({});
+  const [exportTab, setExportTab] = useState<ExportTab>("mdx");
   const [exportMsg, setExportMsg] = useState<string | null>(null);
 
   const entry = useMemo(
@@ -37,29 +155,80 @@ export default function StudioWorkbench() {
     [selectedId],
   );
 
-  const previewProps = useMemo(() => {
-    if (!entry) return {};
-    if (entry.globalName === "CpuPipeline") {
-      const stages = stagesText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      return stages.length ? { stages } : {};
+  useEffect(() => {
+    if (!entry?.props) {
+      setPropValues({});
+      return;
     }
-    return {};
-  }, [entry, stagesText]);
+    const fromUrl =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    const initial: Record<string, unknown> = {};
+    for (const p of entry.props) {
+      const urlVal = fromUrl?.get(p.name);
+      if (urlVal != null) {
+        initial[p.name] = parsePropValue(p, urlVal);
+      } else if (p.name === "stages" && p.type === "string[]") {
+        initial[p.name] = ["IF", "ID", "EX", "MEM", "WB"];
+      } else if (p.name === "autoPlay" && p.type === "boolean") {
+        initial[p.name] = true;
+      }
+    }
+    setPropValues(initial);
+  }, [entry]);
 
-  const handleExport = useCallback(async () => {
-    if (!entry) return;
-    const mdx = buildMdxSnippet(entry, previewProps);
+  useEffect(() => {
+    if (typeof window === "undefined" || !entry) return;
+    const params = new URLSearchParams();
+    params.set("component", entry.id);
+    for (const [k, v] of Object.entries(propValues)) {
+      if (v !== undefined && v !== "")
+        params.set(
+          k,
+          formatPropValue(
+            v,
+            entry.props?.find((p) => p.name === k)?.type ?? "string",
+          ),
+        );
+    }
+    const next = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", next);
+  }, [entry, propValues]);
+
+  const previewProps = useMemo(() => {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(propValues)) {
+      if (v !== undefined && v !== "") out[k] = v;
+    }
+    return out;
+  }, [propValues]);
+
+  const exportSnippet = useMemo(() => {
+    if (!entry) return "";
+    switch (exportTab) {
+      case "mdx":
+        return buildMdxSnippet(entry, previewProps);
+      case "html":
+        return buildHtmlSnippet(entry, previewProps);
+      case "jekyll":
+        return buildJekyllSnippet(entry, previewProps);
+      case "iframe":
+        return buildIframeSnippet(entry);
+    }
+  }, [entry, exportTab, previewProps]);
+
+  const propsKey = JSON.stringify(previewProps);
+
+  const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(mdx);
-      setExportMsg("Copied MDX to clipboard");
+      await navigator.clipboard.writeText(exportSnippet);
+      setExportMsg("Copied to clipboard");
       setTimeout(() => setExportMsg(null), 2500);
     } catch {
-      setExportMsg("Copy failed — select text manually");
+      setExportMsg("Copy failed");
     }
-  }, [entry, previewProps]);
+  }, [exportSnippet]);
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -96,7 +265,7 @@ export default function StudioWorkbench() {
         <div className="z-10 w-full max-w-4xl shadow-2xl ring-1 ring-slate-800/50 rounded-xl overflow-hidden bg-slate-900 min-h-[400px]">
           {entry ? (
             <VislabMount
-              key={entry.id + stagesText}
+              key={entry.id + propsKey}
               component={entry.globalName}
               {...previewProps}
             />
@@ -106,41 +275,67 @@ export default function StudioWorkbench() {
         </div>
       </section>
 
-      <aside className="w-80 border-l border-slate-800 p-4 overflow-y-auto bg-slate-900 shadow-xl z-10 shrink-0">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
-          Properties
-        </h2>
-        {entry?.description && (
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            {entry.description}
-          </p>
-        )}
-        {entry?.globalName === "CpuPipeline" && (
-          <div className="flex flex-col gap-1.5 mb-4">
-            <label className="text-xs font-semibold text-slate-400">
-              Stages (comma-separated)
-            </label>
-            <input
-              type="text"
-              value={stagesText}
-              onChange={(e) => setStagesText(e.target.value)}
-              className="bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 font-mono"
-            />
+      <aside className="w-80 border-l border-slate-800 p-4 overflow-y-auto bg-slate-900 shadow-xl z-10 shrink-0 flex flex-col gap-4">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+            Properties
+          </h2>
+          {entry?.description && (
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+              {entry.description}
+            </p>
+          )}
+          <div className="flex flex-col gap-3">
+            {entry?.props?.map((schema) => (
+              <PropertyField
+                key={schema.name}
+                schema={schema}
+                value={propValues[schema.name]}
+                onChange={(v) =>
+                  setPropValues((prev) => ({ ...prev, [schema.name]: v }))
+                }
+              />
+            ))}
           </div>
-        )}
-        <div className="text-xs font-mono text-slate-500 break-all">
-          &lt;{entry?.customElementTag} /&gt;
+          <div className="text-xs font-mono text-slate-500 break-all mt-4">
+            &lt;{entry?.customElementTag} /&gt;
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleExport}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md font-medium transition-colors"
-        >
-          Copy MDX snippet
-        </button>
-        {exportMsg && (
-          <p className="mt-2 text-xs text-emerald-400">{exportMsg}</p>
-        )}
+
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Export
+          </h2>
+          <div className="flex gap-1 mb-2 flex-wrap">
+            {(["mdx", "html", "jekyll", "iframe"] as ExportTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setExportTab(tab)}
+                className={`px-2 py-1 text-xs rounded border ${
+                  exportTab === tab
+                    ? "bg-blue-600 border-blue-500 text-white"
+                    : "border-slate-700 text-slate-400 hover:bg-slate-800"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <pre className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 rounded p-2 overflow-x-auto max-h-40 whitespace-pre-wrap">
+            {exportSnippet}
+          </pre>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md font-medium transition-colors text-sm"
+          >
+            Copy {exportTab.toUpperCase()}
+          </button>
+          {exportMsg && (
+            <p className="mt-2 text-xs text-emerald-400">{exportMsg}</p>
+          )}
+        </div>
       </aside>
     </div>
   );
