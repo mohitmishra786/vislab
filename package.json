@@ -8,9 +8,14 @@
     "lint": "biome check .",
     "format": "biome check --write . && prettier --write \"**/*.{ts,tsx,md}\"",
     "test": "turbo run test",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm run build && changeset publish",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.0",
     "@biomejs/biome": "^1.9.4",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0",
