@@ -1,0 +1,15 @@
+---
+title: Astro / MDX integration
+---
+
+1. Add `@vislab/react` to your Astro project.
+2. Enable the React integration in `astro.config.mjs`.
+3. Import widgets in `.mdx` or `.astro` files.
+4. Use `client:visible` for below-the-fold embeds (better LCP).
+
+```astro
+---
+import { CpuPipeline } from "@vislab/react";
+---
+<CpuPipeline client:visible stages={["IF","ID","EX","MEM","WB"]} />
+```

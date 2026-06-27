@@ -1,0 +1,21 @@
+---
+title: Core engine API
+---
+
+## Scene
+
+Canvas ECS host. Construct with an `HTMLCanvasElement`, then `addEntity`, `start`, `dispose`.
+
+## SimClock
+
+Deterministic simulation time. `speed` (0.1–10), `pause()`, `resume()`, `togglePause()`.
+
+## Scheduler
+
+Schedule callbacks at simulation times: `schedule({ id, triggerTime, execute })`.
+
+## Primitives
+
+`AnimatedRect`, `Arrow`, `Label`, `Grid`, `QueueViz` — flat PlanetScale-style drawing helpers.
+
+See `packages/core/src` for implementation details until generated TypeDoc lands.
