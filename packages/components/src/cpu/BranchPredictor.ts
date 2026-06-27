@@ -1,92 +1,76 @@
-import { AnimatedRect, Label, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Label, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 import type { VislabWidgetOptions } from "../types";
 
 export class BranchPredictor {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
   private stateLabel: Label;
   private stateMachine: AnimatedRect[] = [];
-
-  // 2-bit saturating counter logic:
-  // 0: Strongly Not Taken, 1: Weakly Not Taken, 2: Weakly Taken, 3: Strongly Taken
   private counter = 0;
 
-  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    // UI Wrapper
-    const wrapper = document.createElement("div");
-    wrapper.setAttribute("data-vislab-widget", "branch-predictor");
-    wrapper.style.fontFamily = themes["dark-terminal"].font;
-    wrapper.style.backgroundColor = themes["dark-terminal"].bg;
-    wrapper.style.color = themes["dark-terminal"].fg;
-    wrapper.style.padding = "20px";
-    wrapper.style.borderRadius = "8px";
-    wrapper.style.display = "flex";
-    wrapper.style.flexDirection = "column";
-    wrapper.style.gap = "15px";
+    const takenBtn = document.createElement("button");
+    takenBtn.type = "button";
+    takenBtn.textContent = "Branch taken";
+    const notTakenBtn = document.createElement("button");
+    notTakenBtn.type = "button";
+    notTakenBtn.textContent = "Not taken";
 
-    // Controls
-    const controls = document.createElement("div");
-    controls.style.display = "flex";
-    controls.style.gap = "10px";
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "2-bit saturating branch predictor",
+      variant: "diagram",
+      canvasHeight: "220px",
+      testId: "branch-predictor",
+      themeName: options?.themeName,
+      headerActions: [takenBtn, notTakenBtn],
+    });
+    this.theme = t;
+    styleVislabButton(takenBtn, t, "primary");
+    styleVislabButton(notTakenBtn, t, "secondary");
 
-    const trueBtn = document.createElement("button");
-    trueBtn.textContent = "Branch Evaluated: Taken";
-    trueBtn.style.padding = "8px 16px";
-    trueBtn.style.cursor = "pointer";
-    trueBtn.style.backgroundColor = themes["dark-terminal"].accent2;
-    trueBtn.style.border = "none";
-
-    const falseBtn = document.createElement("button");
-    falseBtn.textContent = "Branch Evaluated: Not Taken";
-    falseBtn.style.padding = "8px 16px";
-    falseBtn.style.cursor = "pointer";
-    falseBtn.style.backgroundColor = themes["dark-terminal"].accent3;
-    falseBtn.style.border = "none";
-
-    controls.appendChild(trueBtn);
-    controls.appendChild(falseBtn);
-    wrapper.appendChild(controls);
-
-    // Canvas
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
-    canvas.style.height = "250px";
-    wrapper.appendChild(canvas);
-
+    canvas.style.height = "220px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = t.bg;
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
 
-    // Render logic
-    this.stateLabel = new Label("state-lbl", "Prediction: Not Taken", 300, 30);
-    this.stateLabel.font = "20px monospace";
-    this.stateLabel.color = themes["dark-terminal"].fg;
+    this.stateLabel = new Label("state-lbl", "Prediction: Not Taken", 280, 24);
+    this.stateLabel.font = '12px "JetBrains Mono", monospace';
+    this.stateLabel.color = t.fg;
     this.scene.addEntity(this.stateLabel);
 
-    this.layoutStates();
-    this.updateHighlight();
-
-    trueBtn.addEventListener("click", () => this.evaluate(true));
-    falseBtn.addEventListener("click", () => this.evaluate(false));
-
-    this.scene.start();
-  }
-
-  private layoutStates() {
     const states = [
-      "Strongly NG",
-      "Weakly NG",
-      "Weakly Taken",
-      "Strongly Taken",
+      "Strongly NT",
+      "Weakly NT",
+      "Weakly T",
+      "Strongly T",
     ];
     for (let i = 0; i < 4; i++) {
-      const rect = new AnimatedRect(`st-${i}`, 50 + i * 150, 100, 120, 60);
+      const rect = new AnimatedRect(`st-${i}`, 30 + i * 130, 70, 110, 50);
       rect.label = states[i];
-      rect.strokeColor = themes["dark-terminal"].accent4;
+      rect.strokeColor = t.accent4;
+      rect.labelFontPx = 10;
       this.stateMachine.push(rect);
       this.scene.addEntity(rect);
     }
+    this.updateHighlight();
+
+    takenBtn.addEventListener("click", () => this.evaluate(true));
+    notTakenBtn.addEventListener("click", () => this.evaluate(false));
+    this.scene.start();
   }
 
   private evaluate(actuallyTaken: boolean) {
@@ -95,21 +79,17 @@ export class BranchPredictor {
     } else {
       this.counter = Math.max(0, this.counter - 1);
     }
-
     this.updateHighlight();
   }
 
   private updateHighlight() {
+    const t = this.theme;
     for (let i = 0; i < 4; i++) {
       this.stateMachine[i].fillColor =
-        i === this.counter ? themes["dark-terminal"].accent1 : "transparent";
+        i === this.counter ? t.accent1 : "transparent";
     }
-
-    if (this.counter >= 2) {
-      this.stateLabel.text = "Prediction: Taken";
-    } else {
-      this.stateLabel.text = "Prediction: Not Taken";
-    }
+    this.stateLabel.text =
+      this.counter >= 2 ? "Prediction: Taken" : "Prediction: Not Taken";
   }
 
   public destroy() {

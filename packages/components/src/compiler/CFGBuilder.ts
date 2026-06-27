@@ -1,49 +1,90 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 import type { VislabWidgetOptions } from "../types";
 
 export class CFGBuilder {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
+  private blocks: AnimatedRect[] = [];
+  private step = 0;
+  private status: Label;
 
-  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    const wrapper = document.createElement("div");
-    wrapper.setAttribute("data-vislab-widget", "cfg-builder");
+    const stepBtn = document.createElement("button");
+    stepBtn.type = "button";
+    stepBtn.textContent = "Trace path";
+
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "Control-flow graph",
+      variant: "diagram",
+      canvasHeight: "300px",
+      testId: "cfg-builder",
+      themeName: options?.themeName,
+      headerActions: stepBtn,
+    });
+    this.theme = t;
+    styleVislabButton(stepBtn, t, "primary");
+
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
     canvas.style.height = "300px";
-    wrapper.appendChild(canvas);
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = t.bg;
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    const bb1 = new AnimatedRect("bb1", 300, 50, 100, 40);
-    bb1.label = "BB0 (Entry)";
-    bb1.strokeColor = themes["dark-terminal"].accent1;
-    this.scene.addEntity(bb1);
+    const defs = [
+      { id: "bb0", x: 280, y: 40, label: "BB0 Entry" },
+      { id: "bb1", x: 140, y: 130, label: "BB1 True" },
+      { id: "bb2", x: 420, y: 130, label: "BB2 False" },
+      { id: "bb3", x: 280, y: 220, label: "BB3 Join" },
+    ];
+    for (const d of defs) {
+      const b = new AnimatedRect(d.id, d.x, d.y, 100, 36);
+      b.label = d.label;
+      b.strokeColor = t.accent1;
+      b.labelFontPx = 10;
+      this.blocks.push(b);
+      this.scene.addEntity(b);
+    }
 
-    const bb2 = new AnimatedRect("bb2", 150, 150, 100, 40);
-    bb2.label = "BB1 (If True)";
-    this.scene.addEntity(bb2);
+    this.scene.addEntity(new Arrow("e1", 330, 76, 190, 130));
+    this.scene.addEntity(new Arrow("e2", 330, 76, 470, 130));
+    this.scene.addEntity(new Arrow("e3", 190, 166, 330, 220));
+    this.scene.addEntity(new Arrow("e4", 470, 166, 330, 220));
 
-    const bb3 = new AnimatedRect("bb3", 450, 150, 100, 40);
-    bb3.label = "BB2 (If False)";
-    this.scene.addEntity(bb3);
+    this.status = new Label("cfg", "if (x) … else …", 12, 285);
+    this.status.color = t.fg;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
 
-    const bb4 = new AnimatedRect("bb4", 300, 250, 100, 40);
-    bb4.label = "BB3 (Join)";
-    this.scene.addEntity(bb4);
-
-    this.scene.addEntity(new Arrow("a1", 350, 90, 200, 150));
-    this.scene.addEntity(new Arrow("a2", 350, 90, 500, 150));
-    this.scene.addEntity(new Arrow("a3", 200, 190, 350, 250));
-    this.scene.addEntity(new Arrow("a4", 500, 190, 350, 250));
+    const path = [0, 1, 3];
+    stepBtn.addEventListener("click", () => {
+      if (this.step >= path.length) {
+        this.step = 0;
+        for (const b of this.blocks) b.fillColor = "transparent";
+      }
+      const idx = path[this.step++];
+      this.blocks[idx].fillColor = t.accent2;
+      this.status.text = `Executing ${this.blocks[idx].label}`;
+    });
 
     this.scene.start();
   }
 
   public destroy() {
     this.scene.dispose();
+    this.container.innerHTML = "";
   }
 }

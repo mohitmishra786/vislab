@@ -1,51 +1,87 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 import type { VislabWidgetOptions } from "../types";
 
 export class InodeTree {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
+  private nodes: Map<string, AnimatedRect> = new Map();
+  private path = ["/", "home", "data.txt"];
+  private step = 0;
+  private status: Label;
 
-  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    const wrapper = document.createElement("div");
-    wrapper.setAttribute("data-vislab-widget", "inode-tree");
-    wrapper.style.fontFamily = themes["dark-terminal"].font;
-    wrapper.style.backgroundColor = themes["dark-terminal"].bg;
-    wrapper.style.color = themes["dark-terminal"].fg;
-    wrapper.style.padding = "20px";
-    wrapper.style.borderRadius = "8px";
+    const walkBtn = document.createElement("button");
+    walkBtn.type = "button";
+    walkBtn.textContent = "Resolve path";
+
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "Inode tree — path resolution",
+      variant: "terminal",
+      canvasHeight: "360px",
+      testId: "inode-tree",
+      themeName: options?.themeName,
+      headerActions: walkBtn,
+    });
+    this.theme = t;
+    styleVislabButton(walkBtn, t, "secondary");
 
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
-    canvas.style.height = "400px";
-    wrapper.appendChild(canvas);
+    canvas.style.height = "360px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = "#050505";
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    // Simplified Tree Visual
-    const root = new AnimatedRect("root", 300, 50, 100, 40);
-    root.label = "/ (inode: 2)";
-    root.strokeColor = themes["dark-terminal"].accent1;
-    this.scene.addEntity(root);
+    const defs = [
+      { id: "root", x: 280, y: 40, label: "/ inode:2" },
+      { id: "home", x: 140, y: 140, label: "home inode:5" },
+      { id: "usr", x: 420, y: 140, label: "usr inode:8" },
+      { id: "file", x: 140, y: 240, label: "data.txt inode:12" },
+    ];
+    for (const d of defs) {
+      const r = new AnimatedRect(d.id, d.x, d.y, 130, 36);
+      r.label = d.label;
+      r.strokeColor = t.accent1;
+      r.labelFontPx = 10;
+      this.nodes.set(d.id, r);
+      this.scene.addEntity(r);
+    }
 
-    const home = new AnimatedRect("home", 150, 150, 120, 40);
-    home.label = "home/ (inode: 5)";
-    this.scene.addEntity(home);
+    this.scene.addEntity(new Arrow("a1", 345, 76, 205, 140));
+    this.scene.addEntity(new Arrow("a2", 345, 76, 485, 140));
+    this.scene.addEntity(new Arrow("a3", 205, 176, 205, 240));
 
-    const usr = new AnimatedRect("usr", 450, 150, 120, 40);
-    usr.label = "usr/ (inode: 8)";
-    this.scene.addEntity(usr);
+    this.status = new Label("in", "/home/data.txt", 12, 340);
+    this.status.color = t.accent2;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
 
-    const file = new AnimatedRect("file", 150, 250, 140, 40);
-    file.label = "data.txt (inode: 12)";
-    file.fillColor = themes["dark-terminal"].accent2;
-    this.scene.addEntity(file);
-
-    this.scene.addEntity(new Arrow("a1", 350, 90, 210, 150));
-    this.scene.addEntity(new Arrow("a2", 350, 90, 510, 150));
-    this.scene.addEntity(new Arrow("a3", 210, 190, 210, 250));
+    const ids = ["root", "home", "file"];
+    walkBtn.addEventListener("click", () => {
+      if (this.step >= ids.length) {
+        this.step = 0;
+        for (const n of this.nodes.values()) n.fillColor = "transparent";
+      }
+      const id = ids[this.step++];
+      const n = this.nodes.get(id);
+      if (n) {
+        n.fillColor = t.accent2;
+        this.status.text = `Lookup: ${this.path.slice(0, this.step).join("") || "/"}`;
+      }
+    });
 
     this.scene.start();
   }

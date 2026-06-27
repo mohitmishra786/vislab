@@ -1,49 +1,88 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 import type { VislabWidgetOptions } from "../types";
 
 export class Parser {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
+  private nodes: AnimatedRect[] = [];
+  private step = 0;
+  private status: Label;
 
-  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    const wrapper = document.createElement("div");
-    wrapper.setAttribute("data-vislab-widget", "parser");
+    const stepBtn = document.createElement("button");
+    stepBtn.type = "button";
+    stepBtn.textContent = "Build AST step";
+
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "Parser — AST construction",
+      variant: "terminal",
+      canvasHeight: "300px",
+      testId: "parser",
+      themeName: options?.themeName,
+      headerActions: stepBtn,
+    });
+    this.theme = t;
+    styleVislabButton(stepBtn, t, "ghost");
+
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
     canvas.style.height = "300px";
-    wrapper.appendChild(canvas);
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = "#050505";
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    const root = new AnimatedRect("ast-rt", 300, 50, 120, 40);
-    root.label = "Program";
-    root.strokeColor = themes["dark-terminal"].accent1;
-    this.scene.addEntity(root);
+    const defs = [
+      { id: "ast-rt", x: 280, y: 40, label: "Program" },
+      { id: "var-decl", x: 280, y: 130, label: "VarDecl" },
+      { id: "id", x: 140, y: 220, label: "Ident(x)" },
+      { id: "lit", x: 420, y: 220, label: "Lit(42)" },
+    ];
+    for (const d of defs) {
+      const r = new AnimatedRect(d.id, d.x, d.y, 120, 36);
+      r.label = d.label;
+      r.strokeColor = t.accent1;
+      r.labelFontPx = 10;
+      r.visible = false;
+      this.nodes.push(r);
+      this.scene.addEntity(r);
+    }
 
-    const varDecl = new AnimatedRect("var-decl", 300, 150, 140, 40);
-    varDecl.label = "VariableDecl";
-    varDecl.strokeColor = themes["dark-terminal"].accent2;
-    this.scene.addEntity(varDecl);
+    this.scene.addEntity(new Arrow("a1", 340, 76, 340, 130));
+    this.scene.addEntity(new Arrow("a2", 340, 166, 200, 220));
+    this.scene.addEntity(new Arrow("a3", 340, 166, 480, 220));
 
-    const id = new AnimatedRect("id", 150, 250, 100, 40);
-    id.label = "Ident(x)";
-    this.scene.addEntity(id);
+    this.status = new Label("ps", "let x = 42;", 12, 285);
+    this.status.color = t.accent2;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
 
-    const lit = new AnimatedRect("lit", 450, 250, 100, 40);
-    lit.label = "Lit(42)";
-    this.scene.addEntity(lit);
-
-    this.scene.addEntity(new Arrow("a1", 360, 90, 360, 150));
-    this.scene.addEntity(new Arrow("a2", 360, 190, 200, 250));
-    this.scene.addEntity(new Arrow("a3", 360, 190, 500, 250));
+    stepBtn.addEventListener("click", () => {
+      if (this.step < this.nodes.length) {
+        this.nodes[this.step].visible = true;
+        this.nodes[this.step].fillColor = t.accent2;
+        this.status.text = `Reduced: ${this.nodes[this.step].label}`;
+        this.step++;
+      }
+    });
 
     this.scene.start();
   }
 
   public destroy() {
     this.scene.dispose();
+    this.container.innerHTML = "";
   }
 }
