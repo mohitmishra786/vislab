@@ -1,0 +1,90 @@
+---
+import {
+  BTreeOps,
+  BranchPredictor,
+  CFGBuilder,
+  CacheSimulator,
+  CpuPipeline,
+  GraphTraversal,
+  HashCollision,
+  InodeTree,
+  Lexer,
+  Parser,
+  ProcessScheduler,
+  RegisterAllocator,
+  SortRace,
+  StorageComparison,
+  SyscallTrace,
+  TLBWalk,
+  VirtualMemory,
+} from "@vislab/react";
+import Layout from "../../layouts/vislab-page.astro";
+
+/** One widget per page — used by Playwright visual regression (client:load, stable props). */
+const TITLES: Record<string, string> = {
+  "storage-comparison": "Storage I/O latency",
+  "cpu-pipeline": "CPU pipeline",
+  "cache-simulator": "Cache simulator",
+  "branch-predictor": "Branch predictor",
+  "tlb-walk": "TLB walk",
+  "process-scheduler": "Process scheduler",
+  "virtual-memory": "Virtual memory",
+  "syscall-trace": "Syscall trace",
+  "inode-tree": "Inode tree",
+  "sort-race": "Sort race",
+  "btree-ops": "B-tree ops",
+  "graph-traversal": "Graph traversal",
+  "hash-collision": "Hash collision",
+  lexer: "Lexer",
+  parser: "Parser",
+  "cfg-builder": "CFG builder",
+  "register-allocator": "Register allocator",
+};
+
+export function getStaticPaths() {
+  return [
+    "storage-comparison",
+    "cpu-pipeline",
+    "cache-simulator",
+    "branch-predictor",
+    "tlb-walk",
+    "process-scheduler",
+    "virtual-memory",
+    "syscall-trace",
+    "inode-tree",
+    "sort-race",
+    "btree-ops",
+    "graph-traversal",
+    "hash-collision",
+    "lexer",
+    "parser",
+    "cfg-builder",
+    "register-allocator",
+  ].map((id) => ({ params: { id }, props: { id } }));
+}
+
+const { id } = Astro.props;
+const title = TITLES[id] ?? id;
+---
+
+<Layout title={title}>
+  {id === "storage-comparison" && <StorageComparison client:load />}
+  {id === "cpu-pipeline" && <CpuPipeline client:load autoPlay={false} />}
+  {id === "cache-simulator" && <CacheSimulator client:load />}
+  {id === "branch-predictor" && <BranchPredictor client:load />}
+  {id === "tlb-walk" && <TLBWalk client:load />}
+  {id === "process-scheduler" && (
+    <ProcessScheduler client:load autoRun={false} />
+  )}
+  {id === "virtual-memory" && <VirtualMemory client:load />}
+  {id === "syscall-trace" && <SyscallTrace client:load />}
+  {id === "inode-tree" && <InodeTree client:load />}
+  {id === "sort-race" && <SortRace client:load seed={42} />}
+  {id === "btree-ops" && <BTreeOps client:load />}
+  {id === "graph-traversal" && <GraphTraversal client:load />}
+  {id === "hash-collision" && <HashCollision client:load />}
+  {id === "lexer" && <Lexer client:load />}
+  {id === "parser" && <Parser client:load />}
+  {id === "cfg-builder" && <CFGBuilder client:load />}
+  {id === "register-allocator" && <RegisterAllocator client:load />}
+</Layout>

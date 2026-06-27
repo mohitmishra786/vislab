@@ -7,11 +7,18 @@ export type ArticleChromeVariant =
   | "toolbar"
   | "terminal";
 
+/** Tag a widget root for e2e selectors (used by bare-canvas widgets). */
+export function tagWidgetRoot(el: HTMLElement, testId: string): void {
+  el.setAttribute("data-vislab-widget", testId);
+}
+
 export type ArticleChromeOptions = {
   title: string;
   themeName?: string;
   canvasHeight?: string;
   variant?: ArticleChromeVariant;
+  /** Stable selector for e2e tests, e.g. `storage-comparison` */
+  testId?: string;
   /** Optional controls on the right side of the header (toolbar / terminal). */
   headerActions?: HTMLElement | HTMLElement[];
 };
@@ -42,6 +49,7 @@ export function createArticleChrome(options: ArticleChromeOptions): {
     options.canvasHeight ?? defaultHeights[variant as ArticleChromeVariant];
 
   const wrapper = document.createElement("div");
+  wrapper.setAttribute("data-vislab-widget", options.testId ?? options.title);
   wrapper.style.display = "flex";
   wrapper.style.flexDirection = "column";
   wrapper.style.fontFamily = t.font;
@@ -144,6 +152,7 @@ export function createArticleChrome(options: ArticleChromeOptions): {
   }
 
   const canvasMount = document.createElement("div");
+  canvasMount.setAttribute("data-vislab-canvas", "");
   canvasMount.style.width = "100%";
   canvasMount.style.minHeight = canvasH;
   if (variant === "toolbar") {

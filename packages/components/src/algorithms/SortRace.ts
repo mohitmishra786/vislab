@@ -3,14 +3,34 @@ import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
 
+export type SortRaceOptions = {
+  themeName?: string;
+  arraySize?: number;
+  /** Fixed seed for deterministic bar layout (visual tests, docs). */
+  seed?: number;
+};
+
+function seededShuffle(size: number, seed: number): number[] {
+  const arr = Array.from({ length: size }, (_, i) => i + 1);
+  let s = seed >>> 0;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export class SortRace {
   private scene: Scene;
   private container: HTMLElement;
   private isSorting = false;
   private theme: Theme;
+  private arraySize = 9;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: SortRaceOptions) {
     this.container = container;
+    this.arraySize = Math.min(20, Math.max(6, options?.arraySize ?? 9));
 
     const startBtn = document.createElement("button");
     startBtn.type = "button";
@@ -21,9 +41,11 @@ export class SortRace {
       canvasMount,
       theme: t,
     } = createArticleChrome({
-      title: "Sort race — bubble vs insertion",
+      title: "Sort race — bubble vs insertion vs quick",
       variant: "toolbar",
       canvasHeight: "300px",
+      testId: "sort-race",
+      themeName: options?.themeName,
       headerActions: startBtn,
     });
     this.theme = t;
@@ -39,22 +61,22 @@ export class SortRace {
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
 
-    const bubbleArr = this.createArrayVisual(
-      50,
-      50,
-      [8, 3, 5, 1, 9, 2, 7, 4, 6],
-    );
-    const insertArr = this.createArrayVisual(
-      50,
-      150,
-      [8, 3, 5, 1, 9, 2, 7, 4, 6],
-    );
+    const data =
+      options?.seed !== undefined
+        ? seededShuffle(this.arraySize, options.seed)
+        : Array.from({ length: this.arraySize }, (_, i) => i + 1).sort(
+            () => Math.random() - 0.5,
+          );
+    const bubbleArr = this.createArrayVisual(50, 50, data);
+    const insertArr = this.createArrayVisual(50, 130, data);
+    const quickArr = this.createArrayVisual(50, 210, data);
 
     startBtn.addEventListener("click", () => {
       if (this.isSorting) return;
       this.isSorting = true;
       this.runBubbleSort(bubbleArr);
       this.runInsertionSort(insertArr);
+      this.runQuickSort(quickArr);
     });
 
     this.scene.start();
@@ -172,6 +194,60 @@ export class SortRace {
     };
 
     step();
+  }
+
+  /** Simplified quicksort visualization (faster step interval). */
+  private runQuickSort(arr: { rects: AnimatedRect[]; vals: number[] }) {
+    const t = this.theme;
+    const schedule = (fn: () => void, delay = 60) => {
+      this.scene.scheduler.schedule({
+        id: `qs-${this.scene.clock.simTime}`,
+        triggerTime: this.scene.clock.simTime + delay,
+        execute: fn,
+      });
+    };
+
+    const partition = (low: number, high: number, done: () => void) => {
+      if (low >= high) {
+        schedule(done, 40);
+        return;
+      }
+      const pivot = arr.vals[high];
+      let i = low;
+      let j = low;
+      const stepJ = () => {
+        if (j >= high) {
+          const tmp = arr.vals[i];
+          arr.vals[i] = arr.vals[high];
+          arr.vals[high] = tmp;
+          schedule(
+            () => partition(low, i - 1, () => partition(i + 1, high, done)),
+            40,
+          );
+          return;
+        }
+        if (arr.vals[j] < pivot) {
+          const tmp = arr.vals[i];
+          arr.vals[i] = arr.vals[j];
+          arr.vals[j] = tmp;
+          const r1 = arr.rects[i];
+          const r2 = arr.rects[j];
+          const tx = r1.x;
+          r1.moveTo(r2.x, r1.y, 0.2);
+          r2.moveTo(tx, r2.y, 0.2);
+          arr.rects[i] = r2;
+          arr.rects[j] = r1;
+          i++;
+        }
+        j++;
+        schedule(stepJ, 50);
+      };
+      stepJ();
+    };
+
+    partition(0, arr.vals.length - 1, () => {
+      for (const r of arr.rects) r.fillColor = t.accent2;
+    });
   }
 
   public destroy() {

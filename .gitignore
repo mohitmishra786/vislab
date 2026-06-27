@@ -42,9 +42,9 @@ task.md
 vislab-research.md
 walkthrough.md
 PLANS.md
-TODOS.md
 *.webp
 *.png
+!apps/demo-blog/e2e/visual.spec.ts-snapshots/*.png
 .gemini/
 brain/
 scratch/

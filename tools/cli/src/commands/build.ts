@@ -13,9 +13,8 @@ export async function buildCmd(opts: { output?: string }) {
       "Building @vislab/components and @vislab/web-components via turbo…",
     ),
   );
-  await $({
-    cwd: root,
-  })`pnpm exec turbo run build --filter=@vislab/components --filter=@vislab/web-components`;
+  $.cwd = root;
+  await $`pnpm exec turbo run build --filter=@vislab/components --filter=@vislab/web-components`;
 
   await mkdir(outDir, { recursive: true });
 

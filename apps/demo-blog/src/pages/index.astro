@@ -1,51 +1,100 @@
 ---
 import {
+  BTreeOps,
+  BranchPredictor,
+  CFGBuilder,
   CacheSimulator,
   CpuPipeline,
   GraphTraversal,
+  HashCollision,
+  InodeTree,
   Lexer,
+  Parser,
   ProcessScheduler,
+  RegisterAllocator,
   SortRace,
   StorageComparison,
+  SyscallTrace,
+  TLBWalk,
+  VirtualMemory,
 } from "@vislab/react";
 import Layout from "../layouts/vislab-page.astro";
 ---
 
 <Layout title="VisLab demos">
   <p class="lead">
-    Each embed uses a different chrome variant: <strong>article</strong> (storage),
-    <strong>diagram</strong> (pipeline, graph), <strong>toolbar</strong> (cache, sort),
-    <strong>terminal</strong> (scheduler, lexer).
+    All 17 registry widgets — chrome variants: <strong>article</strong>,
+    <strong>diagram</strong>, <strong>toolbar</strong>, <strong>terminal</strong>.
   </p>
 
   <div class="grid">
-    <section class="cell">
+    <section class="cell cell--wide">
       <h2 class="demo-heading">Storage</h2>
-      <StorageComparison client:load />
+      <StorageComparison client:visible />
     </section>
     <section class="cell">
       <h2 class="demo-heading">CPU pipeline</h2>
-      <CpuPipeline client:load />
+      <CpuPipeline client:visible autoPlay={true} />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Branch predictor</h2>
+      <BranchPredictor client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">TLB walk</h2>
+      <TLBWalk client:visible />
     </section>
     <section class="cell cell--wide">
       <h2 class="demo-heading">Cache</h2>
-      <CacheSimulator client:load />
+      <CacheSimulator client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Process scheduler</h2>
+      <ProcessScheduler client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Virtual memory</h2>
+      <VirtualMemory client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Syscall trace</h2>
+      <SyscallTrace client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Inode tree</h2>
+      <InodeTree client:visible />
     </section>
     <section class="cell">
       <h2 class="demo-heading">Sort race</h2>
-      <SortRace client:load />
+      <SortRace client:visible />
     </section>
     <section class="cell">
-      <h2 class="demo-heading">Scheduler</h2>
-      <ProcessScheduler client:load />
+      <h2 class="demo-heading">B-tree ops</h2>
+      <BTreeOps client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Graph traversal</h2>
+      <GraphTraversal client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Hash collisions</h2>
+      <HashCollision client:visible />
     </section>
     <section class="cell">
       <h2 class="demo-heading">Lexer</h2>
-      <Lexer client:load />
+      <Lexer client:visible />
     </section>
     <section class="cell">
-      <h2 class="demo-heading">Graph</h2>
-      <GraphTraversal client:load />
+      <h2 class="demo-heading">Parser</h2>
+      <Parser client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">CFG builder</h2>
+      <CFGBuilder client:visible />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Register allocator</h2>
+      <RegisterAllocator client:visible />
     </section>
   </div>
 </Layout>

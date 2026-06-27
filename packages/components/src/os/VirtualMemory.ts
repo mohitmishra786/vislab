@@ -1,65 +1,159 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
+
+export type VirtualMemoryOptions = {
+  themeName?: string;
+  pageCount?: number;
+};
 
 export class VirtualMemory {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
+  private pageCount: number;
+  private vPages: AnimatedRect[] = [];
+  private pFrames: AnimatedRect[] = [];
+  private pointer: AnimatedRect;
+  private status: Label;
+  private step = 0;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: VirtualMemoryOptions) {
     this.container = container;
+    this.pageCount = Math.min(12, Math.max(4, options?.pageCount ?? 6));
 
-    const wrapper = document.createElement("div");
-    wrapper.style.fontFamily = themes["dark-terminal"].font;
-    wrapper.style.backgroundColor = themes["dark-terminal"].bg;
-    wrapper.style.color = themes["dark-terminal"].fg;
-    wrapper.style.padding = "20px";
-    wrapper.style.borderRadius = "8px";
+    const stepBtn = document.createElement("button");
+    stepBtn.type = "button";
+    stepBtn.textContent = "Page walk";
+    const faultBtn = document.createElement("button");
+    faultBtn.type = "button";
+    faultBtn.textContent = "Page fault";
 
-    // Canvas
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "Virtual memory — page table walk",
+      variant: "terminal",
+      canvasHeight: "360px",
+      testId: "virtual-memory",
+      themeName: options?.themeName,
+      headerActions: [stepBtn, faultBtn],
+    });
+    this.theme = t;
+    styleVislabButton(stepBtn, t, "primary");
+    styleVislabButton(faultBtn, t, "danger");
+
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
-    canvas.style.height = "400px";
-    wrapper.appendChild(canvas);
+    canvas.style.height = "360px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = "#050505";
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    // Virtual Address Space (Process 1)
-    for (let i = 0; i < 5; i++) {
-      const vPage = new AnimatedRect(`vpage-${i}`, 100, 50 + i * 45, 150, 35);
-      vPage.label = `V-Page ${i}`;
-      vPage.strokeColor = themes["dark-terminal"].accent1;
-      this.scene.addEntity(vPage);
+    const ptLabel = new Label("pt", "Page Table", 280, 28);
+    ptLabel.color = t.accent2;
+    ptLabel.font = '11px "JetBrains Mono", monospace';
+    this.scene.addEntity(ptLabel);
+
+    for (let i = 0; i < this.pageCount; i++) {
+      const v = new AnimatedRect(`vp-${i}`, 40, 50 + i * 38, 120, 32);
+      v.label = `v${i}`;
+      v.strokeColor = t.accent1;
+      v.labelFontPx = 11;
+      v.labelColor = t.fg;
+      this.vPages.push(v);
+      this.scene.addEntity(v);
+
+      const p = new AnimatedRect(`pp-${i}`, 480, 50 + i * 38, 120, 32);
+      p.label = `frame ${i}`;
+      p.strokeColor = t.accent2;
+      p.labelFontPx = 11;
+      p.labelColor = t.fg;
+      this.pFrames.push(p);
+      this.scene.addEntity(p);
     }
 
-    // Physical Memory (RAM)
-    for (let i = 0; i < 8; i++) {
-      const pFrame = new AnimatedRect(`pframe-${i}`, 500, 50 + i * 45, 150, 35);
-      pFrame.label = `P-Frame ${i}`;
-      pFrame.strokeColor = themes["dark-terminal"].accent2;
-      this.scene.addEntity(pFrame);
-    }
-
-    // Swap space
-    const swap = new AnimatedRect("swap-dr", 300, 300, 150, 80);
-    swap.label = "Disk Swap";
-    swap.strokeColor = themes["dark-terminal"].accent4;
+    const swap = new AnimatedRect("swap", 280, 300, 140, 40);
+    swap.label = "Swap (disk)";
+    swap.strokeColor = t.accent3;
+    swap.labelFontPx = 11;
     this.scene.addEntity(swap);
 
-    // Mapping Arrows (Page Table conceptual)
-    const a1 = new Arrow("map1", 250, 67, 500, 67); // v0 -> p0
-    a1.color = themes["dark-terminal"].accent2;
-    this.scene.addEntity(a1);
+    this.pointer = new AnimatedRect("ptr", 36, 50, 8, 32);
+    this.pointer.fillColor = t.accent4;
+    this.pointer.strokeColor = "transparent";
+    this.pointer.label = "";
+    this.scene.addEntity(this.pointer);
 
-    const a2 = new Arrow("map2", 250, 112, 500, 157); // v1 -> p2
-    a2.color = themes["dark-terminal"].accent2;
-    this.scene.addEntity(a2);
+    this.status = new Label("st", "TLB miss → walk page table", 40, 340);
+    this.status.color = t.fg;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
 
-    const a3 = new Arrow("map3", 250, 202, 300, 340); // v3 -> swap
-    a3.color = themes["dark-terminal"].accent3; // Red arrow for swapped out
-    a3.isAnimating = true;
-    this.scene.addEntity(a3);
+    stepBtn.addEventListener("click", () => this.walkPage());
+    faultBtn.addEventListener("click", () => this.pageFault());
 
     this.scene.start();
+  }
+
+  private walkPage() {
+    const t = this.theme;
+    const idx = this.step % this.pageCount;
+    const v = this.vPages[idx];
+    const p = this.pFrames[idx];
+    this.pointer.moveTo(36, v.y, 0.15);
+    v.fillColor = t.accent1;
+    this.status.text = `Walking v${idx} → PTE → frame ${idx}`;
+
+    this.scene.scheduler.schedule({
+      id: `map-${idx}`,
+      triggerTime: this.scene.clock.simTime + 500,
+      execute: () => {
+        p.fillColor = t.accent2;
+        const arrow = new Arrow(
+          `a-${idx}-${this.scene.clock.simTime}`,
+          160,
+          v.y + 16,
+          480,
+          p.y + 16,
+        );
+        arrow.color = t.accent2;
+        this.scene.addEntity(arrow);
+        this.scene.scheduler.schedule({
+          id: `clr-${idx}`,
+          triggerTime: this.scene.clock.simTime + 600,
+          execute: () => {
+            v.fillColor = "transparent";
+            p.fillColor = "transparent";
+            this.scene.removeEntity(arrow.id);
+          },
+        });
+        this.step++;
+      },
+    });
+  }
+
+  private pageFault() {
+    const t = this.theme;
+    const idx = Math.floor(Math.random() * this.pageCount);
+    const v = this.vPages[idx];
+    v.fillColor = t.accent3;
+    this.status.text = `Page fault on v${idx} — swap in from disk`;
+    this.scene.scheduler.schedule({
+      id: "fault-swap",
+      triggerTime: this.scene.clock.simTime + 800,
+      execute: () => {
+        this.pFrames[idx].fillColor = t.accent3;
+        v.fillColor = "transparent";
+        this.status.text = `v${idx} mapped after disk read`;
+      },
+    });
   }
 
   public destroy() {

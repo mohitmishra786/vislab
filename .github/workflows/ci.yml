@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, "fix/**", "feat/**"]
   pull_request:
     branches: [main, master]
 
@@ -14,16 +14,20 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm run lint
+      - name: Typecheck
+        run: pnpm run typecheck
       - name: Test
         run: pnpm run test
       - name: Build
         run: pnpm run build
+      - name: Bundle size budget
+        run: pnpm run check:bundle-size
       - name: Install Playwright (Chromium)
         run: pnpm --filter demo-blog exec playwright install chromium
       - name: E2E smoke (demo-blog)

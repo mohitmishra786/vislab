@@ -1,66 +1,74 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 
 export class TLBWalk {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
   private tlb: AnimatedRect;
   private pageTable: AnimatedRect[] = [];
-  private arrows: Arrow[] = [];
+  private status: Label;
+  private hits = 0;
+  private misses = 0;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    const wrapper = document.createElement("div");
-    wrapper.style.fontFamily = themes["dark-terminal"].font;
-    wrapper.style.backgroundColor = themes["dark-terminal"].bg;
-    wrapper.style.color = themes["dark-terminal"].fg;
-    wrapper.style.padding = "20px";
-    wrapper.style.borderRadius = "8px";
-    wrapper.style.display = "flex";
-    wrapper.style.flexDirection = "column";
-    wrapper.style.gap = "15px";
+    const hitBtn = document.createElement("button");
+    hitBtn.type = "button";
+    hitBtn.textContent = "TLB hit";
+    const missBtn = document.createElement("button");
+    missBtn.type = "button";
+    missBtn.textContent = "TLB miss (walk)";
 
-    const controls = document.createElement("div");
-    const walkBtn = document.createElement("button");
-    walkBtn.textContent = "Trigger Page Fault / Walk";
-    walkBtn.style.padding = "8px 16px";
-    walkBtn.style.backgroundColor = themes["dark-terminal"].accent3;
-    walkBtn.style.color = "#fff";
-    walkBtn.style.border = "none";
-    walkBtn.style.cursor = "pointer";
-
-    controls.appendChild(walkBtn);
-    wrapper.appendChild(controls);
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "TLB / page walk",
+      variant: "toolbar",
+      canvasHeight: "320px",
+      testId: "tlb-walk",
+      themeName: options?.themeName,
+      headerActions: [hitBtn, missBtn],
+    });
+    this.theme = t;
+    styleVislabButton(hitBtn, t, "primary");
+    styleVislabButton(missBtn, t, "secondary");
 
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
-    canvas.style.height = "400px";
-    wrapper.appendChild(canvas);
+    canvas.style.height = "320px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = t.bg;
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    // TLB visual
-    this.tlb = new AnimatedRect("tlb-core", 50, 150, 100, 80);
-    this.tlb.label = "TLB (Miss)";
-    this.tlb.strokeColor = themes["dark-terminal"].accent1;
+    this.tlb = new AnimatedRect("tlb", 40, 120, 100, 70);
+    this.tlb.label = "TLB";
+    this.tlb.strokeColor = t.accent1;
+    this.tlb.labelFontPx = 11;
     this.scene.addEntity(this.tlb);
 
-    // Page Table levels (4 levels typical in x86)
     const levels = ["PGD", "PUD", "PMD", "PTE"];
     for (let i = 0; i < 4; i++) {
       const rect = new AnimatedRect(
         `pt-${i}`,
-        250 + i * 150,
-        100 + i * 50,
-        100,
-        50,
+        200 + i * 110,
+        80 + i * 40,
+        90,
+        44,
       );
       rect.label = levels[i];
-      rect.strokeColor = themes["dark-terminal"].accent4;
+      rect.strokeColor = t.accent4;
+      rect.labelFontPx = 10;
       this.pageTable.push(rect);
       this.scene.addEntity(rect);
-
       if (i > 0) {
         const prev = this.pageTable[i - 1];
         const arrow = new Arrow(
@@ -70,54 +78,84 @@ export class TLBWalk {
           rect.x,
           rect.y + rect.height / 2,
         );
-        this.arrows.push(arrow);
+        arrow.color = t.fg;
         this.scene.addEntity(arrow);
       }
     }
 
-    walkBtn.addEventListener("click", () => this.simulateWalk());
+    const phys = new AnimatedRect("phys", 620, 200, 100, 50);
+    phys.label = "Physical";
+    phys.strokeColor = t.accent2;
+    phys.labelFontPx = 11;
+    this.scene.addEntity(phys);
+
+    this.status = new Label("tlb-st", "Hit rate: —", 40, 300);
+    this.status.color = t.fg;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
+
+    hitBtn.addEventListener("click", () => this.simulateHit());
+    missBtn.addEventListener("click", () => this.simulateMiss());
 
     this.scene.start();
   }
 
-  private simulateWalk() {
-    this.tlb.fillColor = themes["dark-terminal"].accent3; // Red
-    this.tlb.label = "TLB MISS!";
+  private updateStats(msg: string) {
+    const total = this.hits + this.misses;
+    const rate = total ? ((this.hits / total) * 100).toFixed(0) : "—";
+    this.status.text = `${msg} · hit ${rate}% (${this.hits}H/${this.misses}M)`;
+  }
 
-    let currentLevel = 0;
+  private simulateHit() {
+    const t = this.theme;
+    this.hits++;
+    this.tlb.fillColor = t.accent2;
+    this.tlb.label = "TLB HIT (~1ns)";
+    this.updateStats("Fast path");
+    this.scene.scheduler.schedule({
+      id: "hit-clr",
+      triggerTime: this.scene.clock.simTime + 500,
+      execute: () => {
+        this.tlb.fillColor = "transparent";
+        this.tlb.label = "TLB";
+      },
+    });
+  }
 
-    const walkStep = () => {
-      if (currentLevel > 0) {
-        this.pageTable[currentLevel - 1].fillColor = "transparent";
-      }
-
-      if (currentLevel < 4) {
-        this.pageTable[currentLevel].fillColor =
-          themes["dark-terminal"].accent1;
+  private simulateMiss() {
+    const t = this.theme;
+    this.misses++;
+    this.tlb.fillColor = t.accent3;
+    this.tlb.label = "TLB MISS";
+    this.updateStats("Page walk…");
+    let level = 0;
+    const walk = () => {
+      if (level > 0) this.pageTable[level - 1].fillColor = "transparent";
+      if (level < 4) {
+        this.pageTable[level].fillColor = t.accent1;
+        level++;
         this.scene.scheduler.schedule({
-          id: `walk-${currentLevel}`,
-          triggerTime: this.scene.clock.simTime + 400,
-          execute: () => {
-            currentLevel++;
-            walkStep();
-          },
+          id: `walk-${level}`,
+          triggerTime: this.scene.clock.simTime + 350,
+          execute: walk,
         });
       } else {
-        // Done walking
-        this.tlb.fillColor = themes["dark-terminal"].accent2;
-        this.tlb.label = "TLB HIT";
-        setTimeout(() => {
-          this.tlb.fillColor = "transparent";
-          this.tlb.label = "TLB (Cached)";
-        }, 800);
+        this.tlb.fillColor = t.accent2;
+        this.tlb.label = "Cached in TLB";
+        this.updateStats("Walk complete (~100ns)");
+        this.scene.scheduler.schedule({
+          id: "miss-done",
+          triggerTime: this.scene.clock.simTime + 500,
+          execute: () => {
+            this.tlb.fillColor = "transparent";
+            this.tlb.label = "TLB";
+            for (const p of this.pageTable) p.fillColor = "transparent";
+          },
+        });
       }
     };
-
-    this.scene.scheduler.schedule({
-      id: "walk-start",
-      triggerTime: this.scene.clock.simTime + 500,
-      execute: walkStep,
-    });
+    walk();
   }
 
   public destroy() {

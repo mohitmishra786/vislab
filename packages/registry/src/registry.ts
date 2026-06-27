@@ -17,20 +17,14 @@ import {
   TLBWalk,
   VirtualMemory,
 } from "@vislab/components";
+import {
+  THEME_PROP,
+  parseBoolean,
+  parseNumber,
+  parseString,
+  parseStringArray,
+} from "./props";
 import type { VislabComponentEntry, VislabWidget } from "./types";
-
-function parseStages(props?: Record<string, unknown>): string[] | undefined {
-  if (!props || props.stages === undefined) return undefined;
-  const s = props.stages;
-  if (Array.isArray(s)) return s.map(String);
-  if (typeof s === "string") {
-    return s
-      .split(",")
-      .map((x) => x.trim())
-      .filter(Boolean);
-  }
-  return undefined;
-}
 
 export const vislabRegistry: VislabComponentEntry[] = [
   {
@@ -41,7 +35,20 @@ export const vislabRegistry: VislabComponentEntry[] = [
     description:
       "Relative latency comparison across storage tiers (Ben Dicken–style).",
     customElementTag: "vislab-storage-comparison",
-    create: (el) => new StorageComparison(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "speed",
+        type: "number",
+        optional: true,
+        description: "SimClock multiplier (0.1–10)",
+      },
+    ],
+    create: (el, props) =>
+      new StorageComparison(el, {
+        themeName: parseString(props, "themeName"),
+        speed: parseNumber(props, "speed"),
+      }),
   },
   {
     id: "cpu-pipeline",
@@ -51,22 +58,55 @@ export const vislabRegistry: VislabComponentEntry[] = [
     description: "Instruction flow through pipeline stages.",
     customElementTag: "vislab-cpu-pipeline",
     props: [
+      THEME_PROP,
       {
         name: "stages",
         type: "string[]",
         optional: true,
         description: "Stage labels, e.g. IF,ID,EX,MEM,WB",
       },
+      {
+        name: "autoPlay",
+        type: "boolean",
+        optional: true,
+        description: "Start animating on mount",
+      },
     ],
-    create: (el, props) => new CpuPipeline(el, parseStages(props)),
+    create: (el, props) =>
+      new CpuPipeline(el, {
+        stages: parseStringArray(props, "stages"),
+        themeName: parseString(props, "themeName"),
+        autoPlay: parseBoolean(props, "autoPlay", true),
+      }),
   },
   {
     id: "cache-simulator",
     globalName: "CacheSimulator",
     displayName: "Cache hierarchy",
     category: "cpu",
+    description: "L1/L2/L3 cache hits, misses, and evictions.",
     customElementTag: "vislab-cache-simulator",
-    create: (el) => new CacheSimulator(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "policy",
+        type: "string",
+        optional: true,
+        description: 'Replacement policy: "lru" or "fifo"',
+      },
+      {
+        name: "lineCount",
+        type: "number",
+        optional: true,
+        description: "Number of memory lines (4–16)",
+      },
+    ],
+    create: (el, props) =>
+      new CacheSimulator(el, {
+        themeName: parseString(props, "themeName"),
+        policy: parseString(props, "policy") as "lru" | "fifo" | undefined,
+        lineCount: parseNumber(props, "lineCount"),
+      }),
   },
   {
     id: "branch-predictor",
@@ -74,7 +114,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Branch predictor",
     category: "cpu",
     customElementTag: "vislab-branch-predictor",
-    create: (el) => new BranchPredictor(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new BranchPredictor(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "tlb-walk",
@@ -82,7 +124,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "TLB / page walk",
     category: "cpu",
     customElementTag: "vislab-tlb-walk",
-    create: (el) => new TLBWalk(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new TLBWalk(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "process-scheduler",
@@ -90,7 +134,37 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Process scheduler",
     category: "os",
     customElementTag: "vislab-process-scheduler",
-    create: (el) => new ProcessScheduler(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "algorithm",
+        type: "string",
+        optional: true,
+        description: '"round-robin" or "cfs"',
+      },
+      {
+        name: "quantum",
+        type: "number",
+        optional: true,
+        description: "Time slice in ms",
+      },
+      {
+        name: "autoRun",
+        type: "boolean",
+        optional: true,
+        description: "Start scheduling loop on mount (default true)",
+      },
+    ],
+    create: (el, props) =>
+      new ProcessScheduler(el, {
+        themeName: parseString(props, "themeName"),
+        algorithm: parseString(props, "algorithm") as
+          | "round-robin"
+          | "cfs"
+          | undefined,
+        quantum: parseNumber(props, "quantum"),
+        autoRun: parseBoolean(props, "autoRun"),
+      }),
   },
   {
     id: "virtual-memory",
@@ -98,7 +172,20 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Virtual memory",
     category: "os",
     customElementTag: "vislab-virtual-memory",
-    create: (el) => new VirtualMemory(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "pageCount",
+        type: "number",
+        optional: true,
+        description: "Virtual pages to display (4–12)",
+      },
+    ],
+    create: (el, props) =>
+      new VirtualMemory(el, {
+        themeName: parseString(props, "themeName"),
+        pageCount: parseNumber(props, "pageCount"),
+      }),
   },
   {
     id: "syscall-trace",
@@ -106,7 +193,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Syscall trace",
     category: "os",
     customElementTag: "vislab-syscall-trace",
-    create: (el) => new SyscallTrace(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new SyscallTrace(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "inode-tree",
@@ -114,7 +203,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Inode tree",
     category: "os",
     customElementTag: "vislab-inode-tree",
-    create: (el) => new InodeTree(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new InodeTree(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "sort-race",
@@ -122,7 +213,27 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Sorting race",
     category: "algorithms",
     customElementTag: "vislab-sort-race",
-    create: (el) => new SortRace(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "arraySize",
+        type: "number",
+        optional: true,
+        description: "Bars per array (6–20)",
+      },
+      {
+        name: "seed",
+        type: "number",
+        optional: true,
+        description: "PRNG seed for deterministic initial bar order",
+      },
+    ],
+    create: (el, props) =>
+      new SortRace(el, {
+        themeName: parseString(props, "themeName"),
+        arraySize: parseNumber(props, "arraySize"),
+        seed: parseNumber(props, "seed"),
+      }),
   },
   {
     id: "btree-ops",
@@ -130,7 +241,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "B-tree ops",
     category: "algorithms",
     customElementTag: "vislab-btree-ops",
-    create: (el) => new BTreeOps(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new BTreeOps(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "graph-traversal",
@@ -138,7 +251,20 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Graph traversal",
     category: "algorithms",
     customElementTag: "vislab-graph-traversal",
-    create: (el) => new GraphTraversal(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "algorithm",
+        type: "string",
+        optional: true,
+        description: '"bfs" or "dfs"',
+      },
+    ],
+    create: (el, props) =>
+      new GraphTraversal(el, {
+        themeName: parseString(props, "themeName"),
+        algorithm: parseString(props, "algorithm") as "bfs" | "dfs" | undefined,
+      }),
   },
   {
     id: "hash-collision",
@@ -146,7 +272,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Hash collisions",
     category: "algorithms",
     customElementTag: "vislab-hash-collision",
-    create: (el) => new HashCollision(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new HashCollision(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "lexer",
@@ -154,7 +282,20 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Lexer",
     category: "compiler",
     customElementTag: "vislab-lexer",
-    create: (el) => new Lexer(el),
+    props: [
+      THEME_PROP,
+      {
+        name: "source",
+        type: "string",
+        optional: true,
+        description: "Source code to tokenize",
+      },
+    ],
+    create: (el, props) =>
+      new Lexer(el, {
+        themeName: parseString(props, "themeName"),
+        source: parseString(props, "source"),
+      }),
   },
   {
     id: "parser",
@@ -162,7 +303,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Parser",
     category: "compiler",
     customElementTag: "vislab-parser",
-    create: (el) => new Parser(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new Parser(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "cfg-builder",
@@ -170,7 +313,9 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "CFG builder",
     category: "compiler",
     customElementTag: "vislab-cfg-builder",
-    create: (el) => new CFGBuilder(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new CFGBuilder(el, { themeName: parseString(props, "themeName") }),
   },
   {
     id: "register-allocator",
@@ -178,7 +323,11 @@ export const vislabRegistry: VislabComponentEntry[] = [
     displayName: "Register allocation",
     category: "compiler",
     customElementTag: "vislab-register-allocator",
-    create: (el) => new RegisterAllocator(el),
+    props: [THEME_PROP],
+    create: (el, props) =>
+      new RegisterAllocator(el, {
+        themeName: parseString(props, "themeName"),
+      }),
   },
 ];
 
@@ -200,6 +349,19 @@ export function getVislabEntryById(
   id: string,
 ): VislabComponentEntry | undefined {
   return byId.get(id);
+}
+
+/** Register a third-party widget at runtime (see #32). */
+export function registerVislabWidget(entry: VislabComponentEntry): void {
+  if (byGlobal.has(entry.globalName)) {
+    throw new Error(`Widget already registered: ${entry.globalName}`);
+  }
+  if (byId.has(entry.id)) {
+    throw new Error(`Widget id already registered: ${entry.id}`);
+  }
+  vislabRegistry.push(entry);
+  byGlobal.set(entry.globalName, entry);
+  byId.set(entry.id, entry);
 }
 
 export function createVislabComponent(

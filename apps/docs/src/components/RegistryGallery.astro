@@ -1,0 +1,46 @@
+---
+import { vislabRegistry } from "@vislab/registry";
+---
+
+<ul class="registry-list">
+  {
+    vislabRegistry.map((c) => (
+      <li>
+        <a href={`/components/${c.id}/`}>
+          <strong>{c.displayName}</strong>
+        </a>
+        <code>{c.globalName}</code>
+        <span class="cat">{c.category}</span>
+        {c.description && <p>{c.description}</p>}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .registry-list {
+    list-style: none;
+    padding: 0;
+  }
+  .registry-list li {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+  }
+  .registry-list code {
+    margin-left: 0.5rem;
+    font-size: 0.85em;
+  }
+  .cat {
+    margin-left: 0.5rem;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .registry-list p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+</style>

@@ -1,104 +1,137 @@
-import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { Theme } from "@vislab/core";
+import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
+import { createArticleChrome } from "../ui/articleChrome";
+import { styleVislabButton } from "../ui/vislabButtons";
 
 export class SyscallTrace {
   private scene: Scene;
   private container: HTMLElement;
+  private theme: Theme;
+  private traceArrow: Arrow;
+  private kernelSpace: AnimatedRect;
+  private userSpace: AnimatedRect;
+  private status: Label;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: VislabWidgetOptions) {
     this.container = container;
 
-    const wrapper = document.createElement("div");
-    wrapper.style.fontFamily = themes["dark-terminal"].font;
-    wrapper.style.backgroundColor = themes["dark-terminal"].bg;
-    wrapper.style.color = themes["dark-terminal"].fg;
-    wrapper.style.padding = "20px";
-    wrapper.style.borderRadius = "8px";
-
-    // Controls
-    const controls = document.createElement("div");
     const syscallBtn = document.createElement("button");
-    syscallBtn.textContent = "Trigger write() syscall";
-    syscallBtn.style.padding = "8px 16px";
-    syscallBtn.style.cursor = "pointer";
-    syscallBtn.style.backgroundColor = themes["dark-terminal"].accent1;
-    syscallBtn.style.border = "none";
+    syscallBtn.type = "button";
+    syscallBtn.textContent = "write() syscall";
 
-    controls.appendChild(syscallBtn);
-    wrapper.appendChild(controls);
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "Syscall trace — user → kernel",
+      variant: "terminal",
+      canvasHeight: "340px",
+      testId: "syscall-trace",
+      themeName: options?.themeName,
+      headerActions: syscallBtn,
+    });
+    this.theme = t;
+    styleVislabButton(syscallBtn, t, "primary");
 
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
-    canvas.style.height = "350px";
-    wrapper.appendChild(canvas);
+    canvas.style.height = "340px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = "#050505";
+    canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
-
     this.scene = new Scene(canvas);
 
-    // User Space vs Kernel Space delineation
-    const userSpace = new AnimatedRect("uspace", 50, 50, 600, 100);
-    userSpace.label = "User Space";
-    userSpace.strokeColor = "#555";
-    this.scene.addEntity(userSpace);
+    this.userSpace = new AnimatedRect("uspace", 40, 40, 520, 90);
+    this.userSpace.label = "User space (Ring 3)";
+    this.userSpace.strokeColor = "#555";
+    this.userSpace.labelFontPx = 11;
+    this.scene.addEntity(this.userSpace);
 
-    const kernelSpace = new AnimatedRect("kspace", 50, 200, 600, 150);
-    kernelSpace.label = "Kernel Space (Ring 0)";
-    kernelSpace.strokeColor = themes["dark-terminal"].accent3;
-    this.scene.addEntity(kernelSpace);
+    this.kernelSpace = new AnimatedRect("kspace", 40, 170, 520, 140);
+    this.kernelSpace.label = "Kernel (Ring 0)";
+    this.kernelSpace.strokeColor = t.accent3;
+    this.kernelSpace.labelFontPx = 11;
+    this.scene.addEntity(this.kernelSpace);
 
-    const app = new AnimatedRect("app", 100, 75, 100, 50);
-    app.label = "App.c";
-    app.fillColor = themes["dark-terminal"].accent1;
+    const app = new AnimatedRect("app", 80, 70, 90, 40);
+    app.label = "App";
+    app.fillColor = t.accent1;
+    app.labelFontPx = 11;
     this.scene.addEntity(app);
 
-    const vfs = new AnimatedRect("vfs", 100, 220, 150, 40);
+    const vfs = new AnimatedRect("vfs", 80, 190, 120, 36);
     vfs.label = "VFS";
-    vfs.strokeColor = themes["dark-terminal"].accent2;
+    vfs.strokeColor = t.accent2;
+    vfs.labelFontPx = 10;
     this.scene.addEntity(vfs);
 
-    const blockLayer = new AnimatedRect("block", 300, 260, 150, 40);
-    blockLayer.label = "Block Layer";
-    blockLayer.strokeColor = themes["dark-terminal"].accent2;
-    this.scene.addEntity(blockLayer);
+    const block = new AnimatedRect("block", 260, 230, 120, 36);
+    block.label = "Block layer";
+    block.strokeColor = t.accent2;
+    block.labelFontPx = 10;
+    this.scene.addEntity(block);
 
-    const deviceDriver = new AnimatedRect("driver", 500, 300, 120, 40);
-    deviceDriver.label = "Device Driver";
-    deviceDriver.strokeColor = themes["dark-terminal"].accent2;
-    this.scene.addEntity(deviceDriver);
+    const driver = new AnimatedRect("driver", 420, 260, 110, 36);
+    driver.label = "Driver";
+    driver.strokeColor = t.accent2;
+    driver.labelFontPx = 10;
+    this.scene.addEntity(driver);
 
-    const traceArrow = new Arrow("trace", 150, 125, 175, 220);
-    traceArrow.visible = false;
-    this.scene.addEntity(traceArrow);
+    this.traceArrow = new Arrow("trace", 125, 110, 140, 190);
+    this.traceArrow.visible = false;
+    this.traceArrow.color = t.accent1;
+    this.scene.addEntity(this.traceArrow);
 
-    syscallBtn.addEventListener("click", () => {
-      traceArrow.visible = true;
-      traceArrow.isAnimating = true;
+    this.status = new Label("sc", "Idle", 40, 325);
+    this.status.color = t.fg;
+    this.status.font = '10px "JetBrains Mono", monospace';
+    this.status.align = "left";
+    this.scene.addEntity(this.status);
 
-      // Context switch visual
-      userSpace.strokeColor = "#333";
-      kernelSpace.strokeColor = themes["dark-terminal"].accent3;
-      kernelSpace.fillColor = "#2a1a1a";
-
-      setTimeout(() => {
-        traceArrow.startX = 250;
-        traceArrow.startY = 240;
-        traceArrow.endX = 300;
-        traceArrow.endY = 280;
-      }, 1000);
-
-      setTimeout(() => {
-        traceArrow.startX = 450;
-        traceArrow.startY = 280;
-        traceArrow.endX = 500;
-        traceArrow.endY = 320;
-      }, 2000);
-
-      setTimeout(() => {
-        traceArrow.visible = false;
-        kernelSpace.fillColor = "transparent";
-      }, 3000);
-    });
+    syscallBtn.addEventListener("click", () => this.runTrace());
 
     this.scene.start();
+  }
+
+  private runTrace() {
+    this.traceArrow.visible = true;
+    this.kernelSpace.fillColor = "#1a1010";
+    this.status.text = "syscall → VFS";
+
+    this.scene.scheduler.schedule({
+      id: "vfs",
+      triggerTime: this.scene.clock.simTime + 600,
+      execute: () => {
+        this.traceArrow.startX = 200;
+        this.traceArrow.startY = 208;
+        this.traceArrow.endX = 320;
+        this.traceArrow.endY = 248;
+        this.status.text = "VFS → block layer";
+      },
+    });
+    this.scene.scheduler.schedule({
+      id: "drv",
+      triggerTime: this.scene.clock.simTime + 1200,
+      execute: () => {
+        this.traceArrow.startX = 380;
+        this.traceArrow.startY = 248;
+        this.traceArrow.endX = 475;
+        this.traceArrow.endY = 278;
+        this.status.text = "Block → device driver";
+      },
+    });
+    this.scene.scheduler.schedule({
+      id: "done",
+      triggerTime: this.scene.clock.simTime + 2000,
+      execute: () => {
+        this.traceArrow.visible = false;
+        this.kernelSpace.fillColor = "transparent";
+        this.status.text = "Return to user space";
+      },
+    });
   }
 
   public destroy() {

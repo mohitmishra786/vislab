@@ -7,7 +7,8 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": "^18.2.0",
@@ -23,5 +24,14 @@
   "dependencies": {
     "@vislab/components": "workspace:*",
     "@vislab/registry": "workspace:*"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitmishra786/vislab.git",
+    "directory": "packages/react"
+  },
+  "license": "MIT"
 }
