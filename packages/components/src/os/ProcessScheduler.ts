@@ -151,7 +151,6 @@ export class ProcessScheduler {
   }
 
   private scheduleNext() {
-    const t = this.theme;
     this.scene.scheduler.schedule({
       id: "sched-tick",
       triggerTime: this.scene.clock.simTime + this.quantum,

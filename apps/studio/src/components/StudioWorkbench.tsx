@@ -17,8 +17,7 @@ function buildMdxSnippet(
       ? " " +
         propsParts
           .map(([k, v]) => {
-            if (typeof v === "string")
-              return `${k}="${v.replace(/"/g, '\\"')}"`;
+            if (typeof v === "string") return `${k}=${JSON.stringify(v)}`;
             return `${k}={${JSON.stringify(v)}}`;
           })
           .join(" ")

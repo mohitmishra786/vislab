@@ -8,7 +8,7 @@ export class Grid extends Entity {
   public cellWidth: number;
   public cellHeight: number;
 
-  private cells: string[][] = [];
+  private cells: string[] = [];
 
   constructor(
     id: string,
@@ -27,17 +27,16 @@ export class Grid extends Entity {
     this.cellWidth = cw;
     this.cellHeight = ch;
 
-    for (let r = 0; r < rows; r++) {
-      this.cells[r] = [];
-      for (let c = 0; c < cols; c++) {
-        this.cells[r][c] = "transparent";
-      }
-    }
+    this.cells = Array.from({ length: rows * cols }, () => "transparent");
+  }
+
+  private cellIndex(r: number, c: number): number {
+    return r * this.cols + c;
   }
 
   public setCellColor(r: number, c: number, color: string) {
     if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
-      this.cells[r][c] = color;
+      this.cells[this.cellIndex(r, c)] = color;
     }
   }
 
@@ -54,7 +53,7 @@ export class Grid extends Entity {
         const cx = this.x + c * this.cellWidth;
         const cy = this.y + r * this.cellHeight;
 
-        ctx.fillStyle = this.cells[r][c];
+        ctx.fillStyle = this.cells[this.cellIndex(r, c)];
         ctx.fillRect(cx, cy, this.cellWidth, this.cellHeight);
         ctx.strokeRect(cx, cy, this.cellWidth, this.cellHeight);
       }
