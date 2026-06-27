@@ -3,26 +3,30 @@
 
 version: 2
 
-registries: {}
+# Force public npm registry (org defaults may route @scoped packages to GitHub Packages).
+registries:
+  npm-npmjs:
+    type: npm-registry
+    url: https://registry.npmjs.org
+    replaces-base: true
 
 updates:
   # ── npm (pnpm monorepo) ──────────────────────────────────────────────
   - package-ecosystem: npm
     directory: /
+    registries:
+      - npm-npmjs
     schedule:
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: America/New_York
     open-pull-requests-limit: 5
     groups:
-      # Club all security patches into a single weekly PR
       security-patches:
         applies-to: security-updates
         patterns:
           - "*"
-        update-types:
-          - patch
-      # Club minor/patch version bumps into one PR (non-security)
       production-deps:
         applies-to: version-updates
         patterns:
@@ -35,7 +39,6 @@ updates:
       - area:ci
     commit-message:
       prefix: chore
-      include: scope
     ignore:
       # Major bumps need manual review (Astro, React, etc.)
       - dependency-name: "*"
@@ -45,6 +48,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: America/New_York
@@ -58,4 +62,3 @@ updates:
       - area:ci
     commit-message:
       prefix: chore
-      include: scope
