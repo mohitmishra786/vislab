@@ -7,6 +7,11 @@ export type ArticleChromeVariant =
   | "toolbar"
   | "terminal";
 
+/** Tag a widget root for e2e selectors (used by bare-canvas widgets). */
+export function tagWidgetRoot(el: HTMLElement, testId: string): void {
+  el.setAttribute("data-vislab-widget", testId);
+}
+
 export type ArticleChromeOptions = {
   title: string;
   themeName?: string;

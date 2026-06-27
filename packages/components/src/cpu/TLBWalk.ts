@@ -12,6 +12,7 @@ export class TLBWalk {
     this.container = container;
 
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("data-vislab-widget", "tlb-walk");
     wrapper.style.fontFamily = themes["dark-terminal"].font;
     wrapper.style.backgroundColor = themes["dark-terminal"].bg;
     wrapper.style.color = themes["dark-terminal"].fg;

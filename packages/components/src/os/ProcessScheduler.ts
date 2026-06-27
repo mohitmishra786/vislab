@@ -38,8 +38,7 @@ export class ProcessScheduler {
     spawnBtn.textContent = "Spawn process";
     const algoBtn = document.createElement("button");
     algoBtn.type = "button";
-    algoBtn.textContent =
-      this.algorithm === "cfs" ? "CFS" : "Round-robin";
+    algoBtn.textContent = this.algorithm === "cfs" ? "CFS" : "Round-robin";
 
     const {
       wrapper,
@@ -47,9 +46,7 @@ export class ProcessScheduler {
       theme: t,
     } = createArticleChrome({
       title:
-        this.algorithm === "cfs"
-          ? "CFS scheduler"
-          : "Round-robin scheduler",
+        this.algorithm === "cfs" ? "CFS scheduler" : "Round-robin scheduler",
       variant: "terminal",
       canvasHeight: "320px",
       testId: "process-scheduler",
@@ -108,8 +105,7 @@ export class ProcessScheduler {
 
     algoBtn.addEventListener("click", () => {
       this.algorithm = this.algorithm === "round-robin" ? "cfs" : "round-robin";
-      algoBtn.textContent =
-        this.algorithm === "cfs" ? "CFS" : "Round-robin";
+      algoBtn.textContent = this.algorithm === "cfs" ? "CFS" : "Round-robin";
       this.updateStatus();
     });
 
@@ -145,9 +141,7 @@ export class ProcessScheduler {
   private pickProcess(): Process | undefined {
     if (this.processes.length === 0) return undefined;
     if (this.algorithm === "cfs") {
-      return this.processes.reduce((a, b) =>
-        a.vruntime < b.vruntime ? a : b,
-      );
+      return this.processes.reduce((a, b) => (a.vruntime < b.vruntime ? a : b));
     }
     return this.processes[0];
   }

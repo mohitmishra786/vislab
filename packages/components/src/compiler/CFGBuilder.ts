@@ -9,6 +9,7 @@ export class CFGBuilder {
     this.container = container;
 
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("data-vislab-widget", "cfg-builder");
     const canvas = document.createElement("canvas");
     canvas.style.width = "100%";
     canvas.style.height = "300px";

@@ -9,6 +9,7 @@ export class SyscallTrace {
     this.container = container;
 
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("data-vislab-widget", "syscall-trace");
     wrapper.style.fontFamily = themes["dark-terminal"].font;
     wrapper.style.backgroundColor = themes["dark-terminal"].bg;
     wrapper.style.color = themes["dark-terminal"].fg;

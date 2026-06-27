@@ -16,6 +16,7 @@ export class BranchPredictor {
 
     // UI Wrapper
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("data-vislab-widget", "branch-predictor");
     wrapper.style.fontFamily = themes["dark-terminal"].font;
     wrapper.style.backgroundColor = themes["dark-terminal"].bg;
     wrapper.style.color = themes["dark-terminal"].fg;
