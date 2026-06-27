@@ -1,8 +1,8 @@
 import type { Theme } from "@vislab/core";
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
-import type { VislabWidgetOptions } from "../types";
 
 export class Parser {
   private scene: Scene;

@@ -182,15 +182,10 @@ export default function StudioWorkbench() {
     if (typeof window === "undefined" || !entry) return;
     const params = new URLSearchParams();
     params.set("component", entry.id);
-    for (const [k, v] of Object.entries(propValues)) {
+    for (const schema of entry.props ?? []) {
+      const v = propValues[schema.name];
       if (v !== undefined && v !== "")
-        params.set(
-          k,
-          formatPropValue(
-            v,
-            entry.props?.find((p) => p.name === k)?.type ?? "string",
-          ),
-        );
+        params.set(schema.name, formatPropValue(v, schema.type));
     }
     const next = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState({}, "", next);
@@ -198,11 +193,12 @@ export default function StudioWorkbench() {
 
   const previewProps = useMemo(() => {
     const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(propValues)) {
-      if (v !== undefined && v !== "") out[k] = v;
+    for (const schema of entry?.props ?? []) {
+      const v = propValues[schema.name];
+      if (v !== undefined && v !== "") out[schema.name] = v;
     }
     return out;
-  }, [propValues]);
+  }, [entry, propValues]);
 
   const exportSnippet = useMemo(() => {
     if (!entry) return "";

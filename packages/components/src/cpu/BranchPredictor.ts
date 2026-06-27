@@ -1,8 +1,8 @@
 import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, Scene } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
-import type { VislabWidgetOptions } from "../types";
 
 export class BranchPredictor {
   private scene: Scene;
@@ -52,12 +52,7 @@ export class BranchPredictor {
     this.stateLabel.color = t.fg;
     this.scene.addEntity(this.stateLabel);
 
-    const states = [
-      "Strongly NT",
-      "Weakly NT",
-      "Weakly T",
-      "Strongly T",
-    ];
+    const states = ["Strongly NT", "Weakly NT", "Weakly T", "Strongly T"];
     for (let i = 0; i < 4; i++) {
       const rect = new AnimatedRect(`st-${i}`, 30 + i * 130, 70, 110, 50);
       rect.label = states[i];

@@ -1,8 +1,8 @@
 import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, Scene } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
-import type { VislabWidgetOptions } from "../types";
 
 export class HashCollision {
   private scene: Scene;
@@ -78,13 +78,7 @@ export class HashCollision {
     const key = this.keys[this.keyIdx++];
     const bucket = this.hash(key);
     const chainX = 150 + (this.keyIdx % 3) * 90;
-    const item = new AnimatedRect(
-      `k-${key}`,
-      140,
-      20,
-      80,
-      22,
-    );
+    const item = new AnimatedRect(`k-${key}`, 140, 20, 80, 22);
     item.label = key;
     item.fillColor = this.theme.accent1;
     item.labelFontPx = 10;
