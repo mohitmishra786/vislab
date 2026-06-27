@@ -9,8 +9,13 @@ export function styleVislabButton(
   el: HTMLButtonElement,
   t: Theme,
   tone: VislabButtonTone = "primary",
+  ariaLabel?: string,
 ): void {
   el.setAttribute("role", "button");
+  if (ariaLabel) el.setAttribute("aria-label", ariaLabel);
+  if (!el.getAttribute("aria-label") && el.textContent) {
+    el.setAttribute("aria-label", el.textContent);
+  }
   el.style.padding = "6px 12px";
   el.style.cursor = "pointer";
   el.style.fontFamily = t.font;
