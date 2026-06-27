@@ -3,7 +3,23 @@ import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
 
-export type SortRaceOptions = { themeName?: string; arraySize?: number };
+export type SortRaceOptions = {
+  themeName?: string;
+  arraySize?: number;
+  /** Fixed seed for deterministic bar layout (visual tests, docs). */
+  seed?: number;
+};
+
+function seededShuffle(size: number, seed: number): number[] {
+  const arr = Array.from({ length: size }, (_, i) => i + 1);
+  let s = seed >>> 0;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export class SortRace {
   private scene: Scene;
@@ -45,9 +61,12 @@ export class SortRace {
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
 
-    const data = Array.from({ length: this.arraySize }, (_, i) => i + 1).sort(
-      () => Math.random() - 0.5,
-    );
+    const data =
+      options?.seed !== undefined
+        ? seededShuffle(this.arraySize, options.seed)
+        : Array.from({ length: this.arraySize }, (_, i) => i + 1).sort(
+            () => Math.random() - 0.5,
+          );
     const bubbleArr = this.createArrayVisual(50, 50, data);
     const insertArr = this.createArrayVisual(50, 130, data);
     const quickArr = this.createArrayVisual(50, 210, data);

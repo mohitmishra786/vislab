@@ -1,22 +1,39 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("visual regression", () => {
-  test("storage widget snapshot", async ({ page }) => {
-    await page.goto("/");
-    const storage = page.locator('[data-vislab-widget="storage-comparison"]');
-    await expect(storage).toBeVisible({ timeout: 20_000 });
-    await expect(storage).toHaveScreenshot("storage-comparison.png", {
-      maxDiffPixelRatio: 0.05,
-    });
-  });
+/** All 17 registry widget ids — must match packages/registry/src/registry.ts */
+const WIDGET_IDS = [
+  "storage-comparison",
+  "cpu-pipeline",
+  "cache-simulator",
+  "branch-predictor",
+  "tlb-walk",
+  "process-scheduler",
+  "virtual-memory",
+  "syscall-trace",
+  "inode-tree",
+  "sort-race",
+  "btree-ops",
+  "graph-traversal",
+  "hash-collision",
+  "lexer",
+  "parser",
+  "cfg-builder",
+  "register-allocator",
+] as const;
 
-  test("cpu pipeline widget snapshot", async ({ page }) => {
-    await page.goto("/");
-    const cpu = page.locator('[data-vislab-widget="cpu-pipeline"]');
-    await expect(cpu).toBeVisible({ timeout: 20_000 });
-    await page.waitForTimeout(500);
-    await expect(cpu).toHaveScreenshot("cpu-pipeline.png", {
-      maxDiffPixelRatio: 0.08,
+test.describe("visual regression", () => {
+  for (const id of WIDGET_IDS) {
+    test(`${id} widget snapshot`, async ({ page }) => {
+      await page.goto(`/visual/${id}`);
+      const widget = page.locator(`[data-vislab-widget="${id}"]`);
+      await expect(widget).toBeVisible({ timeout: 20_000 });
+      await expect(widget.locator("canvas").first()).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      // Let canvas layout and first paint settle
+      await page.waitForTimeout(400);
+      await expect(widget).toHaveScreenshot(`${id}.png`, {
+        maxDiffPixelRatio: 0.05,
+      });
     });
-  });
+  }
 });

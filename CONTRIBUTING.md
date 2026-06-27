@@ -22,3 +22,16 @@ Packages are published as `@vislab/*` on npm; the Jekyll theme is released as th
 
 - `pnpm --filter @vislab/cli exec vislab build` — copy IIFE bundles for static hosting.
 - `pnpm --filter @vislab/cli exec vislab widget -c CpuPipeline -o ./out` — standalone iframe-friendly HTML.
+
+## Visual regression
+
+Widget screenshots live in `apps/demo-blog/e2e/visual.spec.ts-snapshots/`. CI runs them via Playwright after `astro build`.
+
+Update baselines after intentional UI changes:
+
+```bash
+pnpm --filter demo-blog run build
+pnpm --filter demo-blog exec playwright test e2e/visual.spec.ts --update-snapshots
+```
+
+Commit the changed PNG files with your widget PR.

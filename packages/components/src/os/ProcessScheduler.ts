@@ -9,6 +9,8 @@ export type ProcessSchedulerOptions = {
   themeName?: string;
   algorithm?: SchedulerAlgorithm;
   quantum?: number;
+  /** When false, scheduler loop does not start until processes are spawned. */
+  autoRun?: boolean;
 };
 
 type Process = { id: string; color: string; vruntime: number };
@@ -109,7 +111,9 @@ export class ProcessScheduler {
       this.updateStatus();
     });
 
-    this.scheduleNext();
+    if (options?.autoRun !== false) {
+      this.scheduleNext();
+    }
     this.scene.start();
   }
 

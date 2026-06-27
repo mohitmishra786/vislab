@@ -44,6 +44,7 @@ walkthrough.md
 PLANS.md
 *.webp
 *.png
+!apps/demo-blog/e2e/visual.spec.ts-snapshots/*.png
 .gemini/
 brain/
 scratch/

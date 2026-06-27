@@ -148,6 +148,12 @@ export const vislabRegistry: VislabComponentEntry[] = [
         optional: true,
         description: "Time slice in ms",
       },
+      {
+        name: "autoRun",
+        type: "boolean",
+        optional: true,
+        description: "Start scheduling loop on mount (default true)",
+      },
     ],
     create: (el, props) =>
       new ProcessScheduler(el, {
@@ -157,6 +163,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
           | "cfs"
           | undefined,
         quantum: parseNumber(props, "quantum"),
+        autoRun: parseBoolean(props, "autoRun"),
       }),
   },
   {
@@ -214,11 +221,18 @@ export const vislabRegistry: VislabComponentEntry[] = [
         optional: true,
         description: "Bars per array (6–20)",
       },
+      {
+        name: "seed",
+        type: "number",
+        optional: true,
+        description: "PRNG seed for deterministic initial bar order",
+      },
     ],
     create: (el, props) =>
       new SortRace(el, {
         themeName: parseString(props, "themeName"),
         arraySize: parseNumber(props, "arraySize"),
+        seed: parseNumber(props, "seed"),
       }),
   },
   {
