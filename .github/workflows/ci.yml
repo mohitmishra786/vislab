@@ -26,6 +26,8 @@ jobs:
         run: pnpm run test
       - name: Build
         run: pnpm run build
+      - name: Bundle size budget
+        run: pnpm run check:bundle-size
       - name: Install Playwright (Chromium)
         run: pnpm --filter demo-blog exec playwright install chromium
       - name: E2E smoke (demo-blog)
