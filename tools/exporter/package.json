@@ -1,5 +1,21 @@
 {
   "name": "@vislab/exporter",
   "version": "0.0.0",
-  "scripts": {}
+  "private": true,
+  "bin": {
+    "vislab-export": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup src/cli.ts --format cjs --clean --external puppeteer",
+    "export": "node dist/cli.js"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "puppeteer": "^23.6.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
 }

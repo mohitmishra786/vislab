@@ -1,12 +1,12 @@
-import { Entity } from '../engine/Entity';
+import { Entity } from "../engine/Entity";
 
 export class Label extends Entity {
   public x: number;
   public y: number;
   public text: string;
-  public color: string = '#d4d4d4';
-  public font: string = '14px "Courier New", Courier, monospace';
-  public align: CanvasTextAlign = 'center';
+  public color = "#d4d4d4";
+  public font = '14px "Courier New", Courier, monospace';
+  public align: CanvasTextAlign = "center";
 
   constructor(id: string, text: string, x: number, y: number) {
     super(id);
@@ -23,7 +23,7 @@ export class Label extends Entity {
     ctx.fillStyle = this.color;
     ctx.font = this.font;
     ctx.textAlign = this.align;
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = "middle";
     ctx.fillText(this.text, this.x, this.y);
   }
 }

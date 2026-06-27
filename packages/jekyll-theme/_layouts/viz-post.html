@@ -9,7 +9,12 @@
   <style id="vislab-fonts">
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
   </style>
-  <script src="https://unpkg.com/@vislab/components/dist/index.global.js"></script>
+  {% assign embed = page.vislab_embed | default: '/assets/js/vislab-embed.min.js' %}
+  <script src="{{ embed | relative_url }}" defer></script>
+  {% if page.vislab_legacy %}
+  {% assign legacy = page.vislab_legacy | default: '/assets/js/vislab.min.js' %}
+  <script src="{{ legacy | relative_url }}"></script>
+  {% endif %}
 </head>
 <body>
   <main class="container">

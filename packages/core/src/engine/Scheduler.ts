@@ -14,7 +14,10 @@ export class Scheduler {
   }
 
   public update(currentSimTime: number) {
-    while (this.events.length > 0 && this.events[0].triggerTime <= currentSimTime) {
+    while (
+      this.events.length > 0 &&
+      this.events[0].triggerTime <= currentSimTime
+    ) {
       const ev = this.events.shift();
       if (ev) {
         ev.execute();

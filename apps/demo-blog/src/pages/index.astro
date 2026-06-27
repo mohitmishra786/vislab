@@ -1,11 +1,77 @@
 ---
-import Layout from '../layouts/vislab-page.astro';
-import { StorageComparison } from '@vislab/react';
+import {
+  CacheSimulator,
+  CpuPipeline,
+  GraphTraversal,
+  Lexer,
+  ProcessScheduler,
+  SortRace,
+  StorageComparison,
+} from "@vislab/react";
+import Layout from "../layouts/vislab-page.astro";
 ---
 
-<Layout title="Storage Latency Demo">
-  <p>Below is an interactive demonstration of storage latency mapping perfectly using island architecture.</p>
-  
-  <StorageComparison client:load />
+<Layout title="VisLab demos">
+  <p class="lead">
+    Each embed uses a different chrome variant: <strong>article</strong> (storage),
+    <strong>diagram</strong> (pipeline, graph), <strong>toolbar</strong> (cache, sort),
+    <strong>terminal</strong> (scheduler, lexer).
+  </p>
 
+  <div class="grid">
+    <section class="cell">
+      <h2 class="demo-heading">Storage</h2>
+      <StorageComparison client:load />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">CPU pipeline</h2>
+      <CpuPipeline client:load />
+    </section>
+    <section class="cell cell--wide">
+      <h2 class="demo-heading">Cache</h2>
+      <CacheSimulator client:load />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Sort race</h2>
+      <SortRace client:load />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Scheduler</h2>
+      <ProcessScheduler client:load />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Lexer</h2>
+      <Lexer client:load />
+    </section>
+    <section class="cell">
+      <h2 class="demo-heading">Graph</h2>
+      <GraphTraversal client:load />
+    </section>
+  </div>
 </Layout>
+
+<style>
+  .lead {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    max-width: 48rem;
+    line-height: 1.55;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .cell--wide {
+    grid-column: 1 / -1;
+  }
+  .demo-heading {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin: 0 0 0.5rem 0;
+  }
+</style>

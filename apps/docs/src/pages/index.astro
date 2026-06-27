@@ -1,0 +1,29 @@
+---
+import { vislabRegistry } from "@vislab/registry";
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>VisLab — component registry</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+      code { background: #f4f4f5; padding: 0.15rem 0.35rem; border-radius: 4px; }
+      li { margin: 0.5rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>VisLab components</h1>
+    <p>Generated from <code>@vislab/registry</code> (add props and embed examples here over time).</p>
+    <ul>
+      {vislabRegistry.map((c) => (
+        <li>
+          <strong>{c.displayName}</strong> — <code>{c.globalName}</code>
+          <span> ({c.category})</span>
+          {c.description && <div style="font-size: 0.9rem; color: #555;">{c.description}</div>}
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>

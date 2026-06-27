@@ -1,6 +1,6 @@
 export abstract class Entity {
   public id: string;
-  public visible: boolean = true;
+  public visible = true;
 
   constructor(id: string) {
     this.id = id;

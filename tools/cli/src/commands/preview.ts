@@ -1,8 +1,11 @@
-import chalk from 'chalk';
-import { $ } from 'zx';
+import chalk from "chalk";
+import { $ } from "zx";
+import { resolveRepoRoot } from "../util/repoRoot";
 
-export async function previewCmd() {
-  console.log(chalk.cyan('Starting local VisLab dev server...'));
-  // Mock logic
-  console.log(chalk.gray('Listening on http://localhost:3000'));
+export async function previewCmd(opts: { target?: string }) {
+  const root = resolveRepoRoot();
+  const target = opts.target ?? "demo-blog";
+
+  console.log(chalk.cyan(`Starting ${target} dev server…`));
+  await $({ cwd: root, stdio: "inherit" })`pnpm --filter ${target} dev`;
 }

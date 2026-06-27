@@ -1,8 +1,8 @@
 export class SimClock {
-  private speedMultiplier: number = 1.0;
-  private isPaused: boolean = false;
-  private lastRealTime: number = 0;
-  private _simTime: number = 0;
+  private speedMultiplier = 1.0;
+  private isPaused = false;
+  private lastRealTime = 0;
+  private _simTime = 0;
 
   public get simTime(): number {
     return this._simTime;
