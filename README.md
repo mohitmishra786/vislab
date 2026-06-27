@@ -63,6 +63,11 @@ VisLab is designed to work where technical writers work:
 2. **The Studio**: `pnpm --filter studio dev` — registry-driven picker, live preview, **Copy MDX** snippets.
 3. **The Adapters**: **React** (`@vislab/react`), **custom elements** + **`[data-vislab]`** (embed script), and **Jekyll** includes — all driven by `@vislab/registry`.
 
+## Quickstart
+
+Copy-paste guides for **React/Astro**, **static HTML**, and **Jekyll**: [docs/QUICKSTART.md](docs/QUICKSTART.md).  
+Roadmap and open work: [TODOS.md](TODOS.md) · [GitHub Issues](https://github.com/mohitmishra786/vislab/issues).
+
 ## Architecture
 
 - **Core Engine**: A custom entity-component-system (ECS) built purely on the HTML5 Canvas API. Zero external dependencies.
