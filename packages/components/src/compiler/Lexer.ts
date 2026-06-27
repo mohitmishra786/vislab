@@ -28,6 +28,7 @@ export class Lexer {
       title: "Lexer trace",
       variant: "terminal",
       canvasHeight: "220px",
+      testId: "lexer",
       headerActions: stepBtn,
     });
     this.theme = t;

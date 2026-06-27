@@ -11,6 +11,7 @@ export class StorageComparison {
 
     // Header logic stripped down to pure minimalist layout
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("data-vislab-widget", "storage-comparison");
     wrapper.style.display = "flex";
     wrapper.style.flexDirection = "column";
     wrapper.style.fontFamily = t.font;
@@ -55,6 +56,7 @@ export class StorageComparison {
 
     // Canvas Container
     const canvasWrap = document.createElement("div");
+    canvasWrap.setAttribute("data-vislab-canvas", "");
     canvasWrap.style.padding = "40px";
     canvasWrap.style.position = "relative";
 

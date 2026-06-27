@@ -26,6 +26,7 @@ export class CacheSimulator {
       title: "Cache hierarchy",
       variant: "toolbar",
       canvasHeight: "400px",
+      testId: "cache-simulator",
       headerActions: requestBtn,
     });
     this.theme = t;

@@ -24,6 +24,7 @@ export class SortRace {
       title: "Sort race — bubble vs insertion",
       variant: "toolbar",
       canvasHeight: "300px",
+      testId: "sort-race",
       headerActions: startBtn,
     });
     this.theme = t;

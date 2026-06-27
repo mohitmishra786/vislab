@@ -18,6 +18,7 @@ export class GraphTraversal {
       title: "Graph — BFS layout sketch",
       variant: "diagram",
       canvasHeight: "280px",
+      testId: "graph-traversal",
     });
     this.theme = t;
 

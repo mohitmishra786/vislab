@@ -21,6 +21,7 @@ export class CpuPipeline {
       title: "CPU pipeline",
       variant: "diagram",
       canvasHeight: "156px",
+      testId: "cpu-pipeline",
     });
 
     const canvas = document.createElement("canvas");

@@ -10,6 +10,7 @@ export function styleVislabButton(
   t: Theme,
   tone: VislabButtonTone = "primary",
 ): void {
+  el.setAttribute("role", "button");
   el.style.padding = "6px 12px";
   el.style.cursor = "pointer";
   el.style.fontFamily = t.font;

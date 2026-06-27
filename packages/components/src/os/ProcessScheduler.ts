@@ -26,6 +26,7 @@ export class ProcessScheduler {
       title: "Round-robin scheduler",
       variant: "terminal",
       canvasHeight: "300px",
+      testId: "process-scheduler",
       headerActions: spawnBtn,
     });
     this.theme = t;
