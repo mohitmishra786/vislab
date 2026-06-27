@@ -1,10 +1,11 @@
 import { AnimatedRect, Scene, themes } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 
 export class BTreeOps {
   private scene: Scene;
   private container: HTMLElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
     this.container = container;
 
     const wrapper = document.createElement("div");

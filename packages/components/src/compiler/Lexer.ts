@@ -3,6 +3,8 @@ import { AnimatedRect, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
 
+export type LexerOptions = { themeName?: string; source?: string };
+
 export class Lexer {
   private scene: Scene;
   private container: HTMLElement;
@@ -13,8 +15,9 @@ export class Lexer {
   private currentIndex = 0;
   private theme: Theme;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: LexerOptions) {
     this.container = container;
+    if (options?.source) this.sourceText = options.source;
 
     const stepBtn = document.createElement("button");
     stepBtn.type = "button";
@@ -29,6 +32,7 @@ export class Lexer {
       variant: "terminal",
       canvasHeight: "220px",
       testId: "lexer",
+      themeName: options?.themeName,
       headerActions: stepBtn,
     });
     this.theme = t;

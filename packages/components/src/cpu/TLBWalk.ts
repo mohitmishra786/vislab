@@ -1,4 +1,5 @@
 import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 
 export class TLBWalk {
   private scene: Scene;
@@ -7,7 +8,7 @@ export class TLBWalk {
   private pageTable: AnimatedRect[] = [];
   private arrows: Arrow[] = [];
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
     this.container = container;
 
     const wrapper = document.createElement("div");

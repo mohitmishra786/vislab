@@ -1,10 +1,15 @@
 import { AnimatedRect, Scene, themes } from "@vislab/core";
 
+export type StorageComparisonOptions = {
+  themeName?: string;
+  speed?: number;
+};
+
 export class StorageComparison {
   private scene: Scene;
   private container: HTMLElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: StorageComparisonOptions) {
     this.container = container;
 
     const t = themes["dark-premium"];
@@ -222,6 +227,9 @@ export class StorageComparison {
       }
     });
 
+    if (options?.speed) {
+      this.scene.clock.speed = Math.max(0.1, Math.min(10, options.speed));
+    }
     this.scene.start();
   }
 

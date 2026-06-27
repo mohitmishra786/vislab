@@ -2,12 +2,17 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Arrow, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 
+export type GraphTraversalOptions = {
+  themeName?: string;
+  algorithm?: "bfs" | "dfs";
+};
+
 export class GraphTraversal {
   private scene: Scene;
   private container: HTMLElement;
   private theme: Theme;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: GraphTraversalOptions) {
     this.container = container;
 
     const {
@@ -19,6 +24,7 @@ export class GraphTraversal {
       variant: "diagram",
       canvasHeight: "280px",
       testId: "graph-traversal",
+      themeName: options?.themeName,
     });
     this.theme = t;
 

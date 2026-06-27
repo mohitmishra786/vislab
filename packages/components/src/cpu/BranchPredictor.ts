@@ -1,4 +1,5 @@
 import { AnimatedRect, Label, Scene, themes } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 
 export class BranchPredictor {
   private scene: Scene;
@@ -10,7 +11,7 @@ export class BranchPredictor {
   // 0: Strongly Not Taken, 1: Weakly Not Taken, 2: Weakly Taken, 3: Strongly Taken
   private counter = 0;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
     this.container = container;
 
     // UI Wrapper

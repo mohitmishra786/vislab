@@ -3,14 +3,18 @@ import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
 
+export type SortRaceOptions = { themeName?: string; arraySize?: number };
+
 export class SortRace {
   private scene: Scene;
   private container: HTMLElement;
   private isSorting = false;
   private theme: Theme;
+  private arraySize = 9;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: SortRaceOptions) {
     this.container = container;
+    this.arraySize = Math.min(20, Math.max(6, options?.arraySize ?? 9));
 
     const startBtn = document.createElement("button");
     startBtn.type = "button";
@@ -25,6 +29,7 @@ export class SortRace {
       variant: "toolbar",
       canvasHeight: "300px",
       testId: "sort-race",
+      themeName: options?.themeName,
       headerActions: startBtn,
     });
     this.theme = t;

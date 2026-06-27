@@ -1,10 +1,11 @@
 import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
 
 export class CFGBuilder {
   private scene: Scene;
   private container: HTMLElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, _options?: VislabWidgetOptions) {
     this.container = container;
 
     const wrapper = document.createElement("div");

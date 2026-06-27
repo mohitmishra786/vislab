@@ -1,10 +1,15 @@
 import { AnimatedRect, Arrow, Scene, themes } from "@vislab/core";
+import type { VislabWidgetOptions } from "../types";
+
+export type VirtualMemoryOptions = VislabWidgetOptions & {
+  pageCount?: number;
+};
 
 export class VirtualMemory {
   private scene: Scene;
   private container: HTMLElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, _options?: VirtualMemoryOptions) {
     this.container = container;
 
     const wrapper = document.createElement("div");
