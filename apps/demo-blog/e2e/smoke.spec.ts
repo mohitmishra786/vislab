@@ -7,6 +7,11 @@ test("home page loads storage demo with canvas", async ({ page }) => {
   });
 
   await page.goto("/");
-  await expect(page.locator("canvas")).toBeVisible({ timeout: 15_000 });
+  const storageCanvas = page
+    .locator("section")
+    .filter({ hasText: "Storage" })
+    .locator("canvas")
+    .first();
+  await expect(storageCanvas).toBeVisible({ timeout: 15_000 });
   expect(errors.filter((e) => !e.includes("favicon"))).toEqual([]);
 });
