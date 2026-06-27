@@ -5,7 +5,8 @@
     "vislab": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --dts"
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vislab/registry": "workspace:*",

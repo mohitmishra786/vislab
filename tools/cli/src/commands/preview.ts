@@ -7,5 +7,6 @@ export async function previewCmd(opts: { target?: string }) {
   const target = opts.target ?? "demo-blog";
 
   console.log(chalk.cyan(`Starting ${target} dev server…`));
-  await $({ cwd: root, stdio: "inherit" })`pnpm --filter ${target} dev`;
+  $.cwd = root;
+  await $`pnpm --filter ${target} dev`;
 }

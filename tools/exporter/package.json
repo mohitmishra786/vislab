@@ -7,11 +7,12 @@
   },
   "scripts": {
     "build": "tsup src/cli.ts --format cjs --clean --external puppeteer",
-    "export": "node dist/cli.js"
+    "export": "node dist/cli.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "commander": "^11.1.0",
-    "puppeteer": "^23.6.0"
+    "puppeteer": "^24.22.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
