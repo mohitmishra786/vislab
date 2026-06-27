@@ -17,14 +17,14 @@ import {
   TLBWalk,
   VirtualMemory,
 } from "@vislab/components";
-import type { VislabComponentEntry, VislabWidget } from "./types";
 import {
+  THEME_PROP,
   parseBoolean,
   parseNumber,
   parseString,
   parseStringArray,
-  THEME_PROP,
 } from "./props";
+import type { VislabComponentEntry, VislabWidget } from "./types";
 
 export const vislabRegistry: VislabComponentEntry[] = [
   {
@@ -335,6 +335,19 @@ export function getVislabEntryById(
   id: string,
 ): VislabComponentEntry | undefined {
   return byId.get(id);
+}
+
+/** Register a third-party widget at runtime (see #32). */
+export function registerVislabWidget(entry: VislabComponentEntry): void {
+  if (byGlobal.has(entry.globalName)) {
+    throw new Error(`Widget already registered: ${entry.globalName}`);
+  }
+  if (byId.has(entry.id)) {
+    throw new Error(`Widget id already registered: ${entry.id}`);
+  }
+  vislabRegistry.push(entry);
+  byGlobal.set(entry.globalName, entry);
+  byId.set(entry.id, entry);
 }
 
 export function createVislabComponent(

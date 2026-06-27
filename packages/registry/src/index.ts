@@ -11,6 +11,7 @@ export {
   getVislabEntryByGlobalName,
   getVislabEntryById,
   createVislabComponent,
+  registerVislabWidget,
 } from "./registry";
 
 export { mountDataVislabRoots, autoMountVislabOnDomReady } from "./mount";
