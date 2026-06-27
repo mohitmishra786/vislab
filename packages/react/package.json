@@ -4,9 +4,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
@@ -23,6 +21,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@vislab/components": "workspace:*"
+    "@vislab/components": "workspace:*",
+    "@vislab/registry": "workspace:*"
   }
 }

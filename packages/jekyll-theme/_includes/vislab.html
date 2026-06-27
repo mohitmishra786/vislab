@@ -1,11 +1,17 @@
-<div class="vislab-embed" id="vislab-{{ include.id }}"></div>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const container = document.getElementById('vislab-{{ include.id }}');
-    if (window.VisLab && window.VisLab['{{ include.component }}']) {
-      new window.VisLab['{{ include.component }}'](container);
-    } else {
-      container.innerHTML = '<p style="color:red">Failed to load visualization component: {{ include.component }}</p>';
-    }
-  });
-</script>
+{% comment %}
+  Embeds a VisLab widget using data-vislab (requires vislab-embed.min.js in layout head).
+
+  Usage:
+  {% include vislab.html id="demo1" component="StorageComparison" %}
+
+  Optional JSON props:
+  {% include vislab.html id="cpu1" component="CpuPipeline" props='{"stages":["IF","ID","EX","MEM","WB"]}' %}
+{% endcomment %}
+
+<div
+  class="vislab-embed"
+  id="vislab-{{ include.id }}"
+  data-vislab="{{ include.component }}"
+  {% if include.props %}data-props='{{ include.props }}'{% endif %}
+  style="min-height: {{ include.min_height | default: '420px' }}; width: 100%;"
+></div>

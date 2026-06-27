@@ -2,9 +2,9 @@
 
 # VisLab
 
-*"Complexity is the enemy of understanding."*
+_"Complexity is the enemy of understanding."_
 
-High-fidelity systems engineering visualizations for the modern web. 
+High-fidelity systems engineering visualizations for the modern web.
 
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Monorepo](https://img.shields.io/badge/monorepo-turborepo-orange?style=flat-square)](https://turbo.build/)
@@ -16,27 +16,31 @@ High-fidelity systems engineering visualizations for the modern web.
 
 ## Packages
 
-| Component | Version | Description |
-| :--- | :--- | :--- |
-| **@vislab/core** | `0.0.0` | The zero-dependency Canvas rendering engine & SimClock |
-| **@vislab/components** | `0.0.0` | A library of 15+ systems engineering visualizations |
-| **@vislab/react** | `0.0.0` | Type-safe React wrappers for modern web frameworks |
-| **@vislab/cli** | `0.1.0` | Scaffolding and build tool for interactive technical posts |
-| **@vislab/studio** | `0.1.0` | The official web-based component composer (Astro + Tailwind) |
+| Package                               | Version | Description                                                               |
+| :------------------------------------ | :------ | :------------------------------------------------------------------------ |
+| **@vislab/core**                      | `0.0.0` | Canvas engine, `SimClock`, primitives, themes                             |
+| **@vislab/components**                | `0.0.0` | Simulation classes (IIFE global **`VisLab`**)                             |
+| **@vislab/registry**                  | `0.0.0` | Single manifest for every widget (metadata + `create`)                    |
+| **@vislab/react**                     | `0.0.0` | React / MDX via `VislabMount` and named exports                           |
+| **@vislab/web-components**            | `0.0.0` | Embeds: custom elements, `[data-vislab]`, IIFE **`VisLabEmbeds`**         |
+| **@vislab/cli**                       | `0.2.0` | `vislab build`, `widget`, `preview`, `new`                                |
+| **@vislab/exporter**                  | `0.0.0` | Puppeteer PNG frame capture → GIF/MP4 tooling                             |
+| **vislab-jekyll** (gem)               | `0.1.0` | Jekyll layout + includes ([packages/jekyll-theme](packages/jekyll-theme)) |
+| **studio** / **docs** / **demo-blog** | —       | Astro apps: composer, registry docs, React demo                           |
 
 ---
 
 Technical writing is often trapped between two extremes: static, lifeless diagrams that fail to capture temporal complexity, and heavyweight video embeds that hurt SEO and load times.
 
-**VisLab** takes a different approach. It provides a lightweight, GPU-accelerated visualization engine designed specifically for systems engineering (CPU pipelines, cache hierarchies, storage latency, and OS internals). 
+**VisLab** takes a different approach. It provides a lightweight, GPU-accelerated visualization engine designed specifically for systems engineering (CPU pipelines, cache hierarchies, storage latency, and OS internals).
 
 The visuals are not just images—they are living simulations running at 60fps, mapped strictly to technical metrics.
 
 ## The PlanetScale Aesthetic
 
-*"Simplicity is the ultimate sophistication."* — Leonardo da Vinci
+_"Simplicity is the ultimate sophistication."_ — Leonardo da Vinci
 
-VisLab follows a "PlanetScale-style" visual philosophy: bare-metal, retro, and unapologetically technical. 
+VisLab follows a "PlanetScale-style" visual philosophy: bare-metal, retro, and unapologetically technical.
 
 - **Flat Geometry**: No gradients, no dropshadows, no "fluff". Just precise matte shapes.
 - **Strict Monospace**: Powered by `JetBrains Mono` for maximum legibility in technical contexts.
@@ -55,9 +59,9 @@ When you drop a VisLab component into your technical blog or documentation site,
 
 VisLab is designed to work where technical writers work:
 
-1. **The CLI**: Use `vislab new` to scaffold a component and `vislab build` to generate standalone IIFE bundles.
-2. **The Studio**: Launch a local playground to tweak parameters, colors, and simulation speeds via a drag-and-drop interface.
-3. **The Adapters**: Native support for **Astro**, **React**, and **Web Components**. Whether you're using MDX or a standard HTML template, VisLab "just works" via Island Architecture.
+1. **The CLI**: `pnpm --filter @vislab/cli exec vislab build` writes `vislab.min.js` + `vislab-embed.min.js`; `vislab widget -c CpuPipeline` emits iframe-ready HTML.
+2. **The Studio**: `pnpm --filter studio dev` — registry-driven picker, live preview, **Copy MDX** snippets.
+3. **The Adapters**: **React** (`@vislab/react`), **custom elements** + **`[data-vislab]`** (embed script), and **Jekyll** includes — all driven by `@vislab/registry`.
 
 ## Architecture
 
@@ -65,9 +69,9 @@ VisLab is designed to work where technical writers work:
 - **SimClock**: A deterministic simulation clock that allows pausing, slowing down time (0.1x), or speeding up time (10x) for deep analysis.
 - **Monorepo Structure**: Managed via `pnpm` and `Turborepo` for rapid development and standardized builds.
 
-## Looking Ahead
+## Releases and versioning
 
-The roadmap includes a native video exporter (`tools/exporter`) to turn your interactive simulations into high-quality MP4/GIFs for social sharing, and an expanded library of algorithms from Distributed Systems (Raft, Paxos) and Networking (TCP/IP stack).
+All npm packages use `0.x` until the public API stabilizes. Publish with `pnpm -r publish` from a clean `main` (after `pnpm run build` and `pnpm run test`). The Jekyll theme is versioned in `vislab-jekyll.gemspec`. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding a component via the registry.
 
 ---
 

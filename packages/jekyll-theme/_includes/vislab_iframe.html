@@ -1,0 +1,12 @@
+{% comment %}
+  Standalone widget folder from `vislab widget -c CpuPipeline -o assets/vizlab`
+  Usage: {% include vislab_iframe.html src="/assets/vizlab/cpupipeline/index.html" height="480" %}
+{% endcomment %}
+<iframe
+  src="{{ include.src | relative_url }}"
+  title="{{ include.title | default: 'VisLab' }}"
+  width="{{ include.width | default: '100%' }}"
+  height="{{ include.height | default: '450' }}"
+  style="border: none; border-radius: 8px; display: block;"
+  loading="lazy"
+></iframe>

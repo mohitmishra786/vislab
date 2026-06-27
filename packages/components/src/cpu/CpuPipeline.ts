@@ -1,50 +1,73 @@
-import { Scene, AnimatedRect, Arrow, themes, Entity } from '@vislab/core';
+import { AnimatedRect, Arrow, Scene } from "@vislab/core";
+import { createArticleChrome } from "../ui/articleChrome";
+
+const DEFAULT_STAGES = ["IF", "ID", "EX", "MEM", "WB"];
 
 export class CpuPipeline {
   private scene: Scene;
   private container: HTMLElement;
-  private stages: AnimatedRect[] = [];
-  
-  constructor(container: HTMLElement, stageNames: string[] = ['IF', 'ID', 'EX', 'MEM', 'WB']) {
+
+  constructor(container: HTMLElement, stageNames?: string[]) {
     this.container = container;
-    
-    // UI Wrapper
-    const wrapper = document.createElement('div');
-    wrapper.style.fontFamily = themes['dark-terminal'].font;
-    wrapper.style.backgroundColor = themes['dark-terminal'].bg;
-    wrapper.style.color = themes['dark-terminal'].fg;
-    wrapper.style.padding = '20px';
-    wrapper.style.borderRadius = '8px';
-    
-    const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '200px';
-    wrapper.appendChild(canvas);
-    
+
+    const stages =
+      stageNames && stageNames.length > 0 ? stageNames : DEFAULT_STAGES;
+
+    const {
+      wrapper,
+      canvasMount,
+      theme: t,
+    } = createArticleChrome({
+      title: "CPU pipeline",
+      variant: "diagram",
+      canvasHeight: "156px",
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.style.width = "100%";
+    canvas.style.height = "156px";
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = t.bg;
+    canvasMount.appendChild(canvas);
+
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
 
-    // Setup pipeline stages
-    const stageWidth = 80;
-    const stageHeight = 60;
-    const gap = 40;
-    let startX = 50;
-    const y = 50;
+    const stageWidth = 64;
+    const stageHeight = 44;
+    const gap = 20;
+    let startX = 12;
+    const y = 22;
 
-    for (let i = 0; i < stageNames.length; i++) {
-      const rect = new AnimatedRect(`stage-${i}`, startX, y, stageWidth, stageHeight);
-      rect.label = stageNames[i];
-      rect.strokeColor = themes['dark-terminal'].accent1;
-      this.stages.push(rect);
+    for (let i = 0; i < stages.length; i++) {
+      const rect = new AnimatedRect(
+        `stage-${i}`,
+        startX,
+        y,
+        stageWidth,
+        stageHeight,
+      );
+      rect.label = stages[i];
+      rect.strokeColor = t.accent1;
+      rect.fillColor = t.surface;
+      rect.labelColor = t.fg;
+      rect.labelFontPx = 12;
       this.scene.addEntity(rect);
+      startX += stageWidth + gap;
+    }
 
-      // Draw arrow to next stage
-      if (i < stageNames.length - 1) {
-        const arrow = new Arrow(`arrow-${i}`, startX + stageWidth, y + stageHeight / 2, startX + stageWidth + gap, y + stageHeight / 2);
-        arrow.isAnimating = true;
-        this.scene.addEntity(arrow);
-      }
-
+    startX = 12;
+    for (let i = 0; i < stages.length - 1; i++) {
+      const arrow = new Arrow(
+        `arrow-${i}`,
+        startX + stageWidth,
+        y + stageHeight / 2,
+        startX + stageWidth + gap,
+        y + stageHeight / 2,
+      );
+      arrow.isAnimating = true;
+      arrow.color = t.fg;
+      this.scene.addEntity(arrow);
       startX += stageWidth + gap;
     }
 
@@ -52,7 +75,7 @@ export class CpuPipeline {
   }
 
   public destroy() {
-    this.scene.stop();
-    this.container.innerHTML = '';
+    this.scene.dispose();
+    this.container.innerHTML = "";
   }
 }

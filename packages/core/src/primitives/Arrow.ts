@@ -1,15 +1,21 @@
-import { Entity } from '../engine/Entity';
+import { Entity } from "../engine/Entity";
 
 export class Arrow extends Entity {
   public startX: number;
   public startY: number;
   public endX: number;
   public endY: number;
-  public color: string = '#d4d4d4';
-  public animatedOffset: number = 0;
-  public isAnimating: boolean = false;
+  public color = "#d4d4d4";
+  public animatedOffset = 0;
+  public isAnimating = false;
 
-  constructor(id: string, startX: number, startY: number, endX: number, endY: number) {
+  constructor(
+    id: string,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+  ) {
     super(id);
     this.startX = startX;
     this.startY = startY;
@@ -47,8 +53,14 @@ export class Arrow extends Entity {
     const angle = Math.atan2(this.endY - this.startY, this.endX - this.startX);
     ctx.beginPath();
     ctx.moveTo(this.endX, this.endY);
-    ctx.lineTo(this.endX - 10 * Math.cos(angle - Math.PI / 6), this.endY - 10 * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(this.endX - 10 * Math.cos(angle + Math.PI / 6), this.endY - 10 * Math.sin(angle + Math.PI / 6));
+    ctx.lineTo(
+      this.endX - 10 * Math.cos(angle - Math.PI / 6),
+      this.endY - 10 * Math.sin(angle - Math.PI / 6),
+    );
+    ctx.lineTo(
+      this.endX - 10 * Math.cos(angle + Math.PI / 6),
+      this.endY - 10 * Math.sin(angle + Math.PI / 6),
+    );
     ctx.lineTo(this.endX, this.endY);
     ctx.fillStyle = this.color;
     ctx.fill();

@@ -1,4 +1,4 @@
-import { Entity } from '../engine/Entity';
+import { Entity } from "../engine/Entity";
 
 export class AnimatedArc extends Entity {
   public x: number;
@@ -6,11 +6,11 @@ export class AnimatedArc extends Entity {
   public radius: number;
   public startAngle: number;
   public endAngle: number;
-  public fillColor: string = 'transparent';
-  public strokeColor: string = '#d4d4d4';
-  
-  public rotationSpeed: number = 0;
-  private currentRotation: number = 0;
+  public fillColor = "transparent";
+  public strokeColor = "#d4d4d4";
+
+  public rotationSpeed = 0;
+  private currentRotation = 0;
 
   constructor(id: string, x: number, y: number, r: number) {
     super(id);
@@ -31,15 +31,15 @@ export class AnimatedArc extends Entity {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.currentRotation);
-    
+
     ctx.fillStyle = this.fillColor;
     ctx.strokeStyle = this.strokeColor;
     ctx.lineWidth = 2;
-    
+
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, this.startAngle, this.endAngle);
-    
-    if (this.fillColor !== 'transparent') ctx.fill();
+
+    if (this.fillColor !== "transparent") ctx.fill();
     ctx.stroke();
     ctx.restore();
   }

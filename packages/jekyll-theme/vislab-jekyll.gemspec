@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "A Jekyll theme for embedding high-performance VisLab CS visualizations."
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0").select { |f| f.match(%r!^(assets|_layouts|_includes|_sass|LICENSE|README)!i) }
+  spec.files         = Dir['assets/**/*', '_layouts/**/*', '_includes/**/*', '_sass/**/*', 'README.md', '*.gemspec'].reject { |f| File.directory?(f) }
 
   spec.add_runtime_dependency "jekyll", "~> 4.3"
   spec.add_runtime_dependency "jekyll-seo-tag", "~> 2.8"
