@@ -8,7 +8,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.1",
+    "@astrojs/starlight": "^0.41.3",
     "@astrojs/react": "^5.0.7",
     "@vislab/react": "workspace:*",
     "@vislab/registry": "workspace:*",
