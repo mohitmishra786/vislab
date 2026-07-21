@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 import { type CachePolicy, pickVictimIndex, touchOnHit } from "./cachePolicy";
 
@@ -61,6 +62,7 @@ export class CacheSimulator {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Cache hierarchy",
       variant: "toolbar",
@@ -83,15 +85,17 @@ export class CacheSimulator {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "L1/L2/L3 cache hierarchy with memory. Request accesses a random line; toggle LRU/FIFO replacement. Hit rate updates live.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Cache hierarchy",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Cache hierarchy",
+      summary: liveSummary,
     });
 
     this.layoutArchitecture();
@@ -108,6 +112,7 @@ export class CacheSimulator {
     policyBtn.addEventListener("click", () => {
       this.policy = this.policy === "lru" ? "fifo" : "lru";
       policyBtn.textContent = `Policy: ${this.policy.toUpperCase()}`;
+      this.updateStats();
     });
 
     this.scene.start();
@@ -191,6 +196,9 @@ export class CacheSimulator {
     const total = this.hits + this.misses;
     const rate = total > 0 ? ((this.hits / total) * 100).toFixed(0) : "—";
     this.statsLabel.text = `Hit rate: ${rate}% (${this.hits}H / ${this.misses}M) · ${this.policy.toUpperCase()}`;
+    this.runtime?.summary.set(
+      `Cache hierarchy (${this.policy.toUpperCase()}): hit rate ${rate}% (${this.hits} hits, ${this.misses} misses) across L1/L2/L3.`,
+    );
   }
 
   private simulateMemoryAccess(addressIndex: number) {

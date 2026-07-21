@@ -5,6 +5,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export type StorageComparisonOptions = {
@@ -49,15 +50,17 @@ export class StorageComparison {
     const canvas = prepareCanvas({ height: "400px" });
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Relative latency race across L1 cache, NVMe, SSD, and HDD tiers. Use Trigger I/O to race tokens; Pause/Play and speed control the animation.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Storage latency race",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Storage latency race",
+      summary: liveSummary,
     });
 
     const cpuBlock = new AnimatedRect("cpu", 50, 50, 150, 300);
@@ -160,6 +163,9 @@ export class StorageComparison {
                   isRacing = false;
                   timeIOBtn.disabled = false;
                   timeIOBtn.style.opacity = "1";
+                  liveSummary.set(
+                    "Storage race complete. L1 finished first, then NVMe, SSD, and HDD. Trigger I/O again to re-run.",
+                  );
                 }
               }
             },
@@ -173,6 +179,9 @@ export class StorageComparison {
       isRacing = true;
       timeIOBtn.disabled = true;
       timeIOBtn.style.opacity = "0.5";
+      liveSummary.set(
+        "Storage race running: L1, NVMe, SSD, and HDD tokens compete at relative latencies (~1ns → ~10ms).",
+      );
       const endTime = this.scene.clock.simTime + LOOP_DURATION;
       activeTokens = devices.length;
       for (let i = 0; i < devices.length; i++) {
@@ -193,7 +202,7 @@ export class StorageComparison {
     if (options?.speed) {
       this.scene.clock.speed = Math.max(0.1, Math.min(10, options.speed));
     }
-    setSummary(
+    liveSummary.set(
       "Relative latency race: L1 cache, NVMe, SSD, and HDD tokens travel at speeds proportional to typical access latency.",
     );
     this.scene.start();

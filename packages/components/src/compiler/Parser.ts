@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class Parser {
@@ -32,6 +33,7 @@ export class Parser {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Parser — AST construction",
       variant: "terminal",
@@ -51,15 +53,18 @@ export class Parser {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Recursive-descent style AST construction. Build AST step reveals the next node.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Parser — AST construction",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Parser — AST construction",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     const defs = [
@@ -93,7 +98,12 @@ export class Parser {
         this.nodes[this.step].visible = true;
         this.nodes[this.step].fillColor = t.accent2;
         this.status.text = `Reduced: ${this.nodes[this.step].label}`;
+        this.runtime?.summary.set(
+          `Parser AST: reduced ${this.nodes[this.step].label} (${this.step + 1}/${this.nodes.length}).`,
+        );
         this.step++;
+      } else {
+        this.runtime?.summary.set("Parser AST construction complete.");
       }
     });
 

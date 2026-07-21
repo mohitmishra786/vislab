@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 import { type SchedulerAlgorithm, normalizeQuantum } from "./schedulerPolicy";
@@ -57,6 +58,7 @@ export class ProcessScheduler {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title:
         this.algorithm === "cfs" ? "CFS scheduler" : "Round-robin scheduler",
@@ -79,15 +81,18 @@ export class ProcessScheduler {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      `${this.algorithm === "cfs" ? "CFS" : "Round-robin"} process scheduler. Spawn processes, toggle algorithm, watch Gantt and ready queue.`,
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
-      title: "VisLab widget",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "VisLab widget",
+      title:
+        this.algorithm === "cfs" ? "CFS scheduler" : "Round-robin scheduler",
+      summary: liveSummary,
     });
 
     this.cpuCore = new AnimatedRect("cpu", 300, 40, 150, 80);
@@ -141,6 +146,9 @@ export class ProcessScheduler {
   private updateStatus() {
     const q = this.processes.length;
     this.statusLabel.text = `${this.algorithm.toUpperCase()} · quantum ${this.quantum}ms · queue: ${q}`;
+    this.runtime?.summary.set(
+      `${this.algorithm === "cfs" ? "CFS" : "Round-robin"} scheduler · quantum ${this.quantum}ms · ready queue ${q} · tick ${this.tick}.`,
+    );
   }
 
   private addGanttBar(color: string, width: number) {

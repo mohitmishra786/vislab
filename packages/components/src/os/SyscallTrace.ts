@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class SyscallTrace {
@@ -33,6 +34,7 @@ export class SyscallTrace {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Syscall trace — user → kernel",
       variant: "terminal",
@@ -52,15 +54,18 @@ export class SyscallTrace {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "User-space to kernel-space syscall path. Fire syscall to animate the privilege transition.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Syscall trace — user → kernel",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Syscall trace — user → kernel",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     this.userSpace = new AnimatedRect("uspace", 40, 40, 520, 90);
@@ -119,6 +124,9 @@ export class SyscallTrace {
     this.traceArrow.visible = true;
     this.kernelSpace.fillColor = "#1a1010";
     this.status.text = "syscall → VFS";
+    this.runtime?.summary.set(
+      "Syscall trace: user space entered the kernel via syscall → VFS.",
+    );
 
     this.scene.scheduler.schedule({
       id: "vfs",
@@ -129,6 +137,9 @@ export class SyscallTrace {
         this.traceArrow.endX = 320;
         this.traceArrow.endY = 248;
         this.status.text = "VFS → block layer";
+        this.runtime?.summary.set(
+          "Syscall trace: VFS handed off to the block layer.",
+        );
       },
     });
     this.scene.scheduler.schedule({
@@ -140,6 +151,9 @@ export class SyscallTrace {
         this.traceArrow.endX = 475;
         this.traceArrow.endY = 278;
         this.status.text = "Block → device driver";
+        this.runtime?.summary.set(
+          "Syscall trace: block layer → device driver.",
+        );
       },
     });
     this.scene.scheduler.schedule({
@@ -149,6 +163,7 @@ export class SyscallTrace {
         this.traceArrow.visible = false;
         this.kernelSpace.fillColor = "transparent";
         this.status.text = "Return to user space";
+        this.runtime?.summary.set("Syscall complete: returned to user space.");
       },
     });
   }

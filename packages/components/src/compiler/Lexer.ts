@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export type LexerOptions = { themeName?: string; source?: string };
@@ -36,6 +37,7 @@ export class Lexer {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Lexer trace",
       variant: "terminal",
@@ -56,15 +58,18 @@ export class Lexer {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Lexer tokenization of source. Step advances the pointer and emits the next token.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Lexer trace",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Lexer trace",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     this.sourceLabel = new Label("src", this.sourceText, 50, 52);
@@ -82,7 +87,12 @@ export class Lexer {
   }
 
   private step() {
-    if (this.currentIndex >= this.sourceText.length) return;
+    if (this.currentIndex >= this.sourceText.length) {
+      this.runtime?.summary.set(
+        `Lexer complete: ${this.tokens.length} tokens from "${this.sourceText}".`,
+      );
+      return;
+    }
     const t = this.theme;
 
     const charWidth = 12.2;
@@ -110,6 +120,9 @@ export class Lexer {
       this.tokens.push(tRect);
       this.scene.addEntity(tRect);
     }
+    this.runtime?.summary.set(
+      `Lexer: cursor at index ${this.currentIndex}/${this.sourceText.length}, tokens emitted: ${this.tokens.length}.`,
+    );
   }
 
   public destroy() {

@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class InodeTree {
@@ -33,6 +34,7 @@ export class InodeTree {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Inode tree — path resolution",
       variant: "terminal",
@@ -52,15 +54,18 @@ export class InodeTree {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Inode path resolution walk. Step through directory lookups for a sample path.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Inode tree — path resolution",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Inode tree — path resolution",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     const defs = [
@@ -98,7 +103,11 @@ export class InodeTree {
       const n = this.nodes.get(id);
       if (n) {
         n.fillColor = t.accent2;
-        this.status.text = `Lookup: ${this.path.slice(0, this.step).join("") || "/"}`;
+        const pathText = this.path.slice(0, this.step).join("") || "/";
+        this.status.text = `Lookup: ${pathText}`;
+        this.runtime?.summary.set(
+          `Inode path resolution: lookup step ${this.step}/${ids.length} → ${pathText} (${id}).`,
+        );
       }
     });
 
