@@ -121,17 +121,24 @@ export function createArticleChrome(
   header.style.alignItems = "center";
   header.style.borderBottom = `1px solid ${t.border}`;
   header.style.gap = "10px";
-  header.style.flexWrap = "wrap";
+  // Keep a single header row so titles (e.g. "B-tree search") stay visible
+  // and snapshot height is stable across Mac/Linux font metrics.
+  header.style.flexWrap = "nowrap";
+  header.style.overflow = "hidden";
 
   if (variant === "diagram") {
     header.style.padding = "6px 10px";
+    header.style.minHeight = "40px";
   } else if (variant === "toolbar") {
     header.style.padding = "10px 14px";
+    header.style.minHeight = "48px";
   } else if (variant === "terminal") {
     header.style.padding = "8px 12px";
+    header.style.minHeight = "44px";
     header.style.backgroundColor = "#080808";
   } else {
     header.style.padding = "20px 24px";
+    header.style.minHeight = "64px";
   }
 
   const titleEl = document.createElement("h3");
@@ -140,6 +147,9 @@ export function createArticleChrome(
   titleEl.style.margin = "0";
   titleEl.style.flex = "1";
   titleEl.style.minWidth = "0";
+  titleEl.style.whiteSpace = "nowrap";
+  titleEl.style.overflow = "hidden";
+  titleEl.style.textOverflow = "ellipsis";
 
   if (variant === "diagram") {
     titleEl.style.fontSize = "12px";
@@ -168,10 +178,10 @@ export function createArticleChrome(
   if (options.headerActions) {
     const box = document.createElement("div");
     box.style.display = "flex";
-    box.style.gap = "8px";
+    box.style.gap = "6px";
     box.style.alignItems = "center";
     box.style.flexShrink = "0";
-    box.style.flexWrap = "wrap";
+    box.style.flexWrap = "nowrap";
     const nodes = Array.isArray(options.headerActions)
       ? options.headerActions
       : [options.headerActions];
