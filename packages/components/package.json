@@ -28,10 +28,7 @@
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": [
-    "./dist/chunk-*.js",
-    "./dist/chunk-*.mjs"
-  ],
+  "sideEffects": ["./dist/chunk-*.js", "./dist/chunk-*.mjs"],
   "files": ["dist"],
   "scripts": {
     "build": "tsup --config tsup.config.ts",
