@@ -1,5 +1,6 @@
 import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
+import { createSimClockControls } from "../ui/simClockControls";
 import { styleVislabButton } from "../ui/vislabButtons";
 
 export type StorageComparisonOptions = {
@@ -10,6 +11,8 @@ export type StorageComparisonOptions = {
 export class StorageComparison {
   private scene: Scene;
   private container: HTMLElement;
+  private clockControls: ReturnType<typeof createSimClockControls> | null =
+    null;
 
   constructor(container: HTMLElement, options?: StorageComparisonOptions) {
     this.container = container;
@@ -18,26 +21,29 @@ export class StorageComparison {
     timeIOBtn.type = "button";
     timeIOBtn.textContent = "Trigger I/O";
 
+    const clockHost = document.createElement("div");
+
     const {
       wrapper,
-      canvasMount,
+      prepareCanvas,
       theme: t,
+      setSummary,
+      reducedMotion,
     } = createArticleChrome({
-      title: "IO devices and latency",
+      title: "Storage latency race",
       variant: "article",
       canvasHeight: "400px",
       testId: "storage-comparison",
       themeName: options?.themeName,
-      headerActions: timeIOBtn,
+      headerActions: [timeIOBtn, clockHost],
+      summary:
+        "Relative latency race across L1 cache, NVMe, SSD, and HDD tiers. Faster tiers finish sooner.",
+      minWidth: "280px",
     });
 
     styleVislabButton(timeIOBtn, t, "ghost");
 
-    const canvas = document.createElement("canvas");
-    canvas.style.width = "100%";
-    canvas.style.height = "400px";
-    canvas.style.display = "block";
-    canvasMount.appendChild(canvas);
+    const canvas = prepareCanvas({ height: "400px" });
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
 
@@ -174,10 +180,21 @@ export class StorageComparison {
     if (options?.speed) {
       this.scene.clock.speed = Math.max(0.1, Math.min(10, options.speed));
     }
+
+    this.clockControls = createSimClockControls(this.scene, t, {
+      keyboardRoot: wrapper,
+      startPaused: reducedMotion,
+    });
+    clockHost.appendChild(this.clockControls.root);
+
+    setSummary(
+      "Relative latency race: L1 cache, NVMe, SSD, and HDD tokens travel at speeds proportional to typical access latency.",
+    );
     this.scene.start();
   }
 
   public destroy() {
+    this.clockControls?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

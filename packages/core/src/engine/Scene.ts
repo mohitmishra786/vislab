@@ -13,12 +13,18 @@ export class Scene {
   private animationFrameId: number | null = null;
   private active = false;
   private resizeObserver: ResizeObserver | null = null;
+  private visibilityObserver: IntersectionObserver | null = null;
+  private wantRunning = false;
+  private startWhenVisible: boolean;
 
   /** CSS pixel size (logical), matches coordinate system after DPR transform */
   private cssWidth = 0;
   private cssHeight = 0;
 
-  constructor(canvas: HTMLCanvasElement, options?: { autoResize?: boolean }) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    options?: { autoResize?: boolean; startWhenVisible?: boolean },
+  ) {
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not get 2d context");
@@ -26,6 +32,7 @@ export class Scene {
 
     this.clock = new SimClock();
     this.scheduler = new Scheduler();
+    this.startWhenVisible = options?.startWhenVisible !== false;
 
     this.resize();
 
@@ -33,6 +40,22 @@ export class Scene {
     if (autoResize && typeof ResizeObserver !== "undefined") {
       this.resizeObserver = new ResizeObserver(() => this.resize());
       this.resizeObserver.observe(this.canvas);
+    }
+
+    if (this.startWhenVisible && typeof IntersectionObserver !== "undefined") {
+      this.visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.some((e) => e.isIntersecting);
+          if (visible && this.wantRunning && !this.active) {
+            this.runLoop();
+          } else if (!visible && this.active) {
+            // Stop rAF only — do not change SimClock pause state
+            this.stopAnimationFrame();
+          }
+        },
+        { root: null, threshold: 0.05 },
+      );
+      this.visibilityObserver.observe(this.canvas);
     }
   }
 
@@ -66,28 +89,50 @@ export class Scene {
   }
 
   public start() {
-    if (this.active) return;
-    this.active = true;
-    this.clock.resume();
-    this.animationFrameId = requestAnimationFrame(this.loop);
+    this.wantRunning = true;
+    if (this.startWhenVisible && this.visibilityObserver) {
+      // Defer rAF until canvas is on-screen (saves CPU on multi-widget pages)
+      const rect = this.canvas.getBoundingClientRect();
+      const inView =
+        rect.bottom > 0 &&
+        rect.top < (typeof window !== "undefined" ? window.innerHeight : 0);
+      if (!inView) return;
+    }
+    this.runLoop();
   }
 
   public stop() {
+    this.wantRunning = false;
+    this.stopAnimationFrame();
+    this.clock.pause();
+  }
+
+  private runLoop() {
+    if (this.active) return;
+    this.active = true;
+    // Do not force-resume clock; honor user pause via SimClock
+    this.animationFrameId = requestAnimationFrame(this.loop);
+  }
+
+  private stopAnimationFrame() {
     this.active = false;
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
-    this.clock.pause();
   }
 
   /**
    * Stop animation, release observers, clear scheduled work and entities.
    */
   public dispose() {
-    this.stop();
+    this.wantRunning = false;
+    this.stopAnimationFrame();
+    this.clock.pause();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = null;
     this.scheduler.clear();
     this.entities = [];
   }

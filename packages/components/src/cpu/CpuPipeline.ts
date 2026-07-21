@@ -1,5 +1,6 @@
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
+import { createSimClockControls } from "../ui/simClockControls";
 import { styleVislabButton } from "../ui/vislabButtons";
 import { detectDataHazard } from "./pipelineHazards";
 
@@ -28,6 +29,8 @@ export class CpuPipeline {
   private nextInstNum = 1;
   private stallLabel: Label | null = null;
   private running = false;
+  private clockControls: ReturnType<typeof createSimClockControls> | null =
+    null;
 
   constructor(container: HTMLElement, options?: CpuPipelineOptions) {
     this.container = container;
@@ -36,37 +39,32 @@ export class CpuPipeline {
         ? options.stages
         : DEFAULT_STAGES;
 
-    const playBtn = document.createElement("button");
-    playBtn.type = "button";
-    playBtn.textContent = "Pause";
     const stepBtn = document.createElement("button");
     stepBtn.type = "button";
     stepBtn.textContent = "Step";
+    const clockHost = document.createElement("div");
 
     const {
       wrapper,
-      canvasMount,
+      prepareCanvas,
       theme: t,
+      setSummary,
+      reducedMotion,
     } = createArticleChrome({
       title: "CPU pipeline",
       variant: "diagram",
       canvasHeight: "200px",
       testId: "cpu-pipeline",
       themeName: options?.themeName,
-      headerActions: [playBtn, stepBtn],
+      headerActions: [clockHost, stepBtn],
+      summary: `Instruction pipeline stages: ${this.stages.join(" → ")}.`,
+      minWidth: "280px",
     });
 
-    styleVislabButton(playBtn, t, "primary");
     styleVislabButton(stepBtn, t, "secondary");
-    playBtn.setAttribute("aria-label", "Play or pause pipeline");
     stepBtn.setAttribute("aria-label", "Advance one pipeline cycle");
 
-    const canvas = document.createElement("canvas");
-    canvas.style.width = "100%";
-    canvas.style.height = "200px";
-    canvas.style.display = "block";
-    canvas.style.backgroundColor = t.bg;
-    canvasMount.appendChild(canvas);
+    const canvas = prepareCanvas({ height: "200px" });
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
@@ -119,32 +117,38 @@ export class CpuPipeline {
     this.stallLabel.font = '11px "JetBrains Mono", monospace';
     this.scene.addEntity(this.stallLabel);
 
-    playBtn.addEventListener("click", () => {
-      if (this.running) {
-        this.scene.clock.pause();
-        this.running = false;
-        playBtn.textContent = "Play";
-      } else {
-        this.scene.clock.resume();
-        this.running = true;
-        playBtn.textContent = "Pause";
-      }
+    const wantAuto = options?.autoPlay !== false && !reducedMotion;
+
+    this.clockControls = createSimClockControls(this.scene, t, {
+      keyboardRoot: wrapper,
+      startPaused: !wantAuto,
+      onPauseChange: (paused) => {
+        this.running = !paused;
+        if (!paused) {
+          this.scheduleFetch();
+          this.scheduleAdvance();
+        }
+      },
     });
+    clockHost.appendChild(this.clockControls.root);
 
     stepBtn.addEventListener("click", () => {
       this.scene.clock.pause();
       this.running = false;
-      playBtn.textContent = "Play";
+      this.clockControls?.refresh();
       this.advancePipeline();
     });
 
     this.scene.start();
-    if (options?.autoPlay !== false) {
+    if (wantAuto) {
       this.running = true;
       this.scene.clock.speed = 1.5;
       this.scheduleFetch();
       this.scheduleAdvance();
     }
+    setSummary(
+      `CPU pipeline visualization with stages ${this.stages.join(", ")}. Use Pause/Play and speed controls; Step advances one cycle.`,
+    );
   }
 
   private scheduleAdvance() {
@@ -243,6 +247,7 @@ export class CpuPipeline {
   }
 
   public destroy() {
+    this.clockControls?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -30,10 +30,10 @@ export const vislabRegistry: VislabComponentEntry[] = [
   {
     id: "storage-comparison",
     globalName: "StorageComparison",
-    displayName: "Storage I/O latency",
+    displayName: "Storage latency race",
     category: "storage",
     description:
-      "Relative latency comparison across storage tiers (Ben Dicken–style).",
+      "Relative latency race across L1, NVMe, SSD, and HDD storage tiers.",
     customElementTag: "vislab-storage-comparison",
     props: [
       THEME_PROP,
