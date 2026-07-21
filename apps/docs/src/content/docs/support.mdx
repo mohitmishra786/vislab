@@ -1,0 +1,24 @@
+---
+title: Support tiers
+description: What the solo project commits to support
+---
+
+## Tier 1 — fully supported
+
+- `@vislab/react` (React 18+/MDX/Astro islands)
+- Static HTML via `vislab-embed.min.js` and `data-vislab` / custom elements
+- Core engine + registry + CLI `build` / `widget` / `preview`
+
+## Tier 2 — best effort
+
+- `vislab-jekyll` gem and includes
+- No new Jekyll features until Tier 1 is solid
+
+## Tier 3 — optional tooling
+
+- `@vislab/exporter` (Puppeteer) for frame capture
+- GIF/MP4 encoding depends on external tools (`gifski`, `ffmpeg`)
+
+## CI cost note
+
+Visual regression (Playwright) and optional Puppeteer paths are the expensive CI jobs. Prefer lifecycle unit tests for most PRs; keep full visual suites on main/release.

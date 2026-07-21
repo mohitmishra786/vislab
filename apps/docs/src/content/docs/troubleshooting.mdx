@@ -1,0 +1,52 @@
+---
+title: Troubleshooting
+description: Blank canvas, SSR, fonts, CORS, and unknown component errors
+---
+
+## Blank canvas / nothing renders
+
+1. Confirm the embed script or React island actually mounted (`client:visible` / `client:load` in Astro).
+2. Check the browser console for `[VisLab]` errors.
+3. Unknown names render a red **alert** box: fix the `data-vislab` / component name (PascalCase, e.g. `CpuPipeline`).
+4. Ensure the host has non-zero width; set `min-height` on the mount node.
+
+## SSR / Astro hydration
+
+Widgets touch `document` and canvas — they must run on the **client**:
+
+```astro
+<CpuPipeline client:visible />
+```
+
+Do not SSR-render the canvas without an island directive.
+
+## Fonts look wrong
+
+Themes reference **JetBrains Mono**. Load it on the host page or accept `Courier New` fallback:
+
+```html
+<link
+  href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+  rel="stylesheet"
+/>
+```
+
+## `file://` CORS / module issues
+
+Serve static demos over `http://localhost` (e.g. `pnpm --filter demo-blog dev`). Opening raw `file://` HTML may block modules.
+
+## Node version errors
+
+Root `engines` requires **Node ≥ 22.12**. Older Node will fail Astro 6 builds.
+
+## Build fails with `js-yaml` default export
+
+Root `pnpm.overrides` pins `js-yaml@4.3.0`. Do not force js-yaml 5 — it has no default export and breaks Astro config loading.
+
+## Puppeteer / export failures
+
+Exporter is optional. Install Chromium via Puppeteer only when using `@vislab/exporter`. Missing `ffmpeg`/`gifski` is expected if you only capture frames.
+
+## Many widgets, high CPU
+
+Scenes pause `requestAnimationFrame` when off-screen. Prefer `client:visible` and avoid starting dozens of widgets above the fold simultaneously.

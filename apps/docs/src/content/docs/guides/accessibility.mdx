@@ -1,0 +1,38 @@
+---
+title: Accessibility for authors
+description: How to embed VisLab widgets without excluding screen-reader users
+---
+
+## Canvas is visual-only
+
+Canvas pixels are **not** exposed as a DOM tree. VisLab provides:
+
+- Header title (`h3`) and control buttons with `aria-label`
+- Canvas `role="img"` + `aria-labelledby` / `aria-describedby`
+- A visually hidden **text summary** updated by flagship widgets
+
+Authors **must** still explain the concept in surrounding prose.
+
+## Recommended pattern
+
+```html
+<figure>
+  <div data-vislab="CpuPipeline" style="min-height:200px"></div>
+  <figcaption>
+    Five-stage pipeline (IF → ID → EX → MEM → WB). Data hazards insert stall bubbles.
+  </figcaption>
+</figure>
+```
+
+## Reduced motion
+
+When `prefers-reduced-motion: reduce` is set, flagship widgets that autoplay (e.g. CPU pipeline) start **paused**. Users can still press Play.
+
+## Keyboard
+
+- **Space** toggles pause when focus is inside a widget that includes SimClock controls
+- Header buttons are focusable native `<button>` elements
+
+## What we do not claim
+
+Full WCAG conformance for educational meaning inside the bitmap. Treat widgets as **illustrations** with accessible captions, not as the sole teaching surface.

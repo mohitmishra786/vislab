@@ -1,0 +1,20 @@
+# VisLab Widgets
+
+> Embeddable systems & CS education canvas simulations for technical writing (CPU, cache, OS, storage).
+
+- Docs: https://mohitmishra786.github.io/vislab
+- Source: https://github.com/mohitmishra786/vislab
+- License: MIT
+- Status: pre-1.0; install from monorepo until npm 0.1.0
+
+## Primary pages
+
+- / Quickstart and introduction
+- /components/ Widget gallery
+- /compare/ vs Mermaid / Excalidraw / video
+- /guides/accessibility Accessibility for authors
+- /guides/seo SEO patterns for canvas embeds
+
+## Note
+
+Canvas simulations are illustrations. Prefer surrounding prose for educational content and SEO.

@@ -1,0 +1,36 @@
+---
+title: Studio workflow
+description: Compose widgets and copy MDX/HTML/Jekyll/iframe snippets
+---
+
+## Run Studio locally
+
+```bash
+pnpm install
+pnpm run build
+pnpm --filter studio dev
+```
+
+Open the printed localhost URL. Studio is not a hosted SaaS yet.
+
+## Workflow
+
+1. Pick a component from the registry list
+2. Edit props (theme, stages, policy, etc.)
+3. Preview the live widget
+4. Choose export tab: **MDX**, **HTML**, **Jekyll**, or **iframe**
+5. Copy the snippet into your post
+
+## Snippet notes
+
+- MDX snippets assume Astro-style `client:visible`
+- HTML snippets require `vislab-embed.min.js` on the page
+- Iframe paths assume you generated pages with `vislab widget -c Name` and host them under a known base path — adjust the `src` for your deploy
+
+## Codespaces / one-click
+
+Use GitHub Codespaces or a local clone. A `.devcontainer` may be added later; until then:
+
+```bash
+pnpm install && pnpm run build && pnpm --filter studio dev
+```

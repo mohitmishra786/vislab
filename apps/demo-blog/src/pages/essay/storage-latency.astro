@@ -1,0 +1,73 @@
+---
+import { CacheSimulator, CpuPipeline, StorageComparison } from "@vislab/react";
+import Layout from "../../layouts/vislab-page.astro";
+---
+
+<Layout title="Storage latency you can feel">
+  <article class="prose">
+    <p>
+      Static diagrams struggle to convey <em>how much</em> slower a disk seek is
+      than an L1 hit. Video helps, but is heavy and hard to scrub while reading.
+      Below, VisLab Widgets run a relative latency race in your browser.
+    </p>
+
+    <figure>
+      <StorageComparison client:visible />
+      <figcaption>
+        Tokens race from the CPU outward. Faster tiers finish first — ratios are
+        pedagogical, not a micro-benchmark of your laptop.
+      </figcaption>
+    </figure>
+
+    <h2>Why this matters for blogs</h2>
+    <p>
+      When you teach databases or systems, readers need temporal intuition. An
+      interactive race they can slow to 0.1× beats a static bar chart for
+      “feel,” while staying lighter than a multi-megabyte MP4.
+    </p>
+
+    <h2>Related widgets</h2>
+    <figure>
+      <CacheSimulator client:visible />
+      <figcaption>Cache hierarchy hits and misses (LRU / FIFO).</figcaption>
+    </figure>
+    <figure>
+      <CpuPipeline client:visible />
+      <figcaption>Five-stage pipeline with simplified hazard stalls.</figcaption>
+    </figure>
+
+    <p>
+      Source and embeds:
+      <a href="https://github.com/mohitmishra786/vislab">VisLab Widgets on GitHub</a>.
+    </p>
+  </article>
+</Layout>
+
+<style>
+  .prose {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+    font-family: system-ui, sans-serif;
+    line-height: 1.6;
+    color: #e4e4e7;
+    background: #0a0a0a;
+    min-height: 100vh;
+  }
+  .prose h1,
+  .prose h2 {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 600;
+  }
+  .prose a {
+    color: #00e5ff;
+  }
+  .prose figure {
+    margin: 2rem 0;
+  }
+  .prose figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+</style>

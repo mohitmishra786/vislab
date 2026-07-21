@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VisLab Widgets — static HTML example</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- After: pnpm run build && pnpm --filter @vislab/cli exec vislab build -o ./examples/html/vislab -->
+    <script src="./vislab/vislab-embed.min.js" defer></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      code {
+        font-family: "JetBrains Mono", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Static HTML embed (Hugo/11ty/any host)</h1>
+    <p>
+      Works for Hugo, 11ty, plain nginx, etc. Host
+      <code>vislab-embed.min.js</code> next to your site and mount with
+      <code>data-vislab</code>.
+    </p>
+    <figure>
+      <div
+        data-vislab="CpuPipeline"
+        data-props='{"stages":["IF","ID","EX","MEM","WB"]}'
+        style="min-height: 220px; width: 100%"
+      ></div>
+      <figcaption>
+        CPU pipeline embed via static HTML — no React required.
+      </figcaption>
+    </figure>
+  </body>
+</html>

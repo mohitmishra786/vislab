@@ -1,89 +1,47 @@
 # VisLab Roadmap
 
-> Registry-first platform for systems engineering visualizations.  
-> Track work in [GitHub Issues](https://github.com/mohitmishra786/vislab/issues) — this file is the high-level map.
+> Living **Now / Next / Later** map. Detailed history lives in closed GitHub issues and `audits/`.
+
+**Last updated:** 2026-07-21
 
 ---
 
-## Current state (June 2026)
+## Now (launch blockers)
 
-| Layer                          | Status                                                          |
-| ------------------------------ | --------------------------------------------------------------- |
-| Core engine (`@vislab/core`)   | Done — Scene, SimClock, primitives, themes                      |
-| Widgets (`@vislab/components`) | 17 registered; all use shared `articleChrome` variants          |
-| Registry (`@vislab/registry`)  | Done — single manifest, props schema, third-party registration  |
-| React / Web Components         | Done — `VislabMount`, `data-vislab`, auto custom elements       |
-| CLI                            | Done — `build`, `widget`, `preview`, `new`, `export` (GIF/MP4)  |
-| Studio                         | Done — picker, registry property panel, embed export tabs       |
-| Docs site                      | Starlight — live gallery for all 17 widgets + guides + API      |
-| CI                             | Lint, typecheck, test, build, e2e, visual regression, bundle    |
-| npm publish                    | Prepared (`publishConfig`, Changesets workflow) — not tagged  |
-| Video export                   | GIF + MP4 via ffmpeg                                            |
+- [x] Restore green monorepo build (js-yaml pin, Starlight 0.40 for Astro 6)
+- [x] Package metadata (exports, keywords, descriptions)
+- [x] SECURITY.md + CODE_OF_CONDUCT.md
+- [x] Flagship policy unit tests + mount error UI
+- [x] Canvas a11y baseline + SimClock controls on flagships
+- [ ] First **0.1.0 npm publish** (needs `NPM_TOKEN` + human approval)
+- [ ] Deploy docs/demo to GitHub Pages (`mohitmishra786.github.io/vislab`)
+- [ ] Set GitHub repo homepage to deployed demo URL
 
-**Pre-release ready.** Remaining before `npm` tag: Astro 6 migration for last 2 high-severity advisories, then publish.
+## Next (post-publish)
 
----
+- [ ] Expand remaining widget docs beyond flagships
+- [ ] Wire SimClock controls into all temporal widgets
+- [ ] Consumer pack-install smoke tests in CI
+- [ ] Mobile viewport e2e for top 5 widgets
+- [ ] Flagship interactive blog series (content marketing)
+- [ ] `good first issue` labels + ADOPTERS.md entries
 
-## Phase: pre-release
+## Later
 
-Issues: [#3](https://github.com/mohitmishra786/vislab/issues/3), [#4](https://github.com/mohitmishra786/vislab/issues/4), [#8](https://github.com/mohitmishra786/vislab/issues/8), [#11](https://github.com/mohitmishra786/vislab/issues/11), [#33](https://github.com/mohitmishra786/vislab/issues/33), [#35](https://github.com/mohitmishra786/vislab/issues/35)
+- [ ] Astro 7 + Starlight 0.41 major upgrade (coordinated)
+- [ ] Per-widget code-splitting for IIFE embed
+- [ ] WebKit Playwright job
+- [ ] SVG export / static twin for print a11y
+- [ ] GitHub Sponsors after meaningful adoption (~100 stars)
+- [ ] Custom domain (do **not** use `vislab.dev` — university collision)
 
-- [x] Registry platform consolidation (PR #2)
-- [x] CI pnpm + e2e fixes
-- [x] Typecheck in CI
-- [x] Dependabot reduction (47 → 12; happy-dom, vite, esbuild, babel patched)
-- [x] Quickstart guide ([docs/QUICKSTART.md](docs/QUICKSTART.md))
-- [ ] Astro 6 upgrade (2 remaining high-severity advisories on Astro 5)
+## Support tiers (frozen)
 
----
-
-## Phase: beta
-
-Issues: [#5](https://github.com/mohitmishra786/vislab/issues/5)–[#31](https://github.com/mohitmishra786/vislab/issues/31)
-
-### Platform
-
-- [x] Registry `props` schema for all 17 widgets ([#16](https://github.com/mohitmishra786/vislab/issues/16))
-- [x] Studio registry-driven property editor ([#17](https://github.com/mohitmishra786/vislab/issues/17))
-- [x] Studio embed export tabs ([#18](https://github.com/mohitmishra786/vislab/issues/18))
-- [x] Changesets + publish workflow ([#7](https://github.com/mohitmishra786/vislab/issues/7))
-- [x] Component lifecycle tests ([#6](https://github.com/mohitmishra786/vislab/issues/6))
-- [x] Visual regression tests — 17 widget snapshots ([#5](https://github.com/mohitmishra786/vislab/issues/5))
-- [x] Bundle size budget ([#31](https://github.com/mohitmishra786/vislab/issues/31))
-
-### Widget fidelity
-
-- [x] CpuPipeline flagship ([#19](https://github.com/mohitmishra786/vislab/issues/19))
-- [x] CacheSimulator flagship ([#20](https://github.com/mohitmishra786/vislab/issues/20))
-- [x] ProcessScheduler flagship ([#21](https://github.com/mohitmishra786/vislab/issues/21))
-- [x] VirtualMemory + TLBWalk ([#22](https://github.com/mohitmishra786/vislab/issues/22))
-- [x] SortRace flagship ([#23](https://github.com/mohitmishra786/vislab/issues/23))
-- [x] StorageComparison → shared articleChrome ([#25](https://github.com/mohitmishra786/vislab/issues/25))
-- [x] demo-blog all 17 widgets ([#29](https://github.com/mohitmishra786/vislab/issues/29))
-
-### Docs & distribution
-
-- [x] Starlight docs site ([#12](https://github.com/mohitmishra786/vislab/issues/12))
-- [x] Live component gallery — all 17 MDX pages ([#13](https://github.com/mohitmishra786/vislab/issues/13))
-- [x] API reference from JSDoc ([#14](https://github.com/mohitmishra786/vislab/issues/14))
-- [x] Integration guides ([#15](https://github.com/mohitmishra786/vislab/issues/15))
-- [x] npm pre-release publish prep ([#9](https://github.com/mohitmishra786/vislab/issues/9))
-- [x] Jekyll gem publish prep ([#10](https://github.com/mohitmishra786/vislab/issues/10))
-- [x] CLI project scaffolds ([#26](https://github.com/mohitmishra786/vislab/issues/26))
-
----
-
-## Phase: 1.0
-
-Issues: [#24](https://github.com/mohitmishra786/vislab/issues/24), [#27](https://github.com/mohitmishra786/vislab/issues/27)–[#34](https://github.com/mohitmishra786/vislab/issues/34)
-
-- [x] Depth pass on remaining 10 widgets ([#24](https://github.com/mohitmishra786/vislab/issues/24))
-- [x] GIF + MP4 export pipeline ([#27](https://github.com/mohitmishra786/vislab/issues/27), [#28](https://github.com/mohitmishra786/vislab/issues/28))
-- [x] Accessibility — ARIA labels on chrome ([#30](https://github.com/mohitmishra786/vislab/issues/30))
-- [x] Third-party widget registration API ([#32](https://github.com/mohitmishra786/vislab/issues/32))
-- [x] HTML examples folder ([#34](https://github.com/mohitmishra786/vislab/issues/34))
-
----
+| Tier | Paths | Policy |
+| ---- | ----- | ------ |
+| **1** | React/MDX (`@vislab/react`), static HTML embed | Fully supported |
+| **2** | Jekyll gem | Best-effort; no new features until Tier 1 is rock-solid |
+| **3** | Puppeteer exporter / GIF-MP4 | Optional tooling only |
 
 ## Architecture (current)
 
@@ -93,12 +51,12 @@ Issues: [#24](https://github.com/mohitmishra786/vislab/issues/24), [#27](https:/
 @vislab/registry      → Metadata + create() — single source of truth
 @vislab/react         → VislabMount + catalog exports
 @vislab/web-components → Custom elements + [data-vislab]
-@vislab/cli           → build, widget, preview, new, export
-vislab-jekyll         → Jekyll includes
+@vislab/cli           → build, widget, preview, new, export (0.2.0)
+vislab-jekyll         → Jekyll includes (tier 2)
 ```
 
 Adding a widget: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
+## Audit implementation
 
-_Last updated: June 2026_
+Progress against the 360° audit: [`audits/IMPLEMENTATION_LOG.md`](audits/IMPLEMENTATION_LOG.md).

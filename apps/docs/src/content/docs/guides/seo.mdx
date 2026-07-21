@@ -1,0 +1,25 @@
+---
+title: SEO for embeds
+description: Canvas widgets do not create crawlable content — author patterns that do
+---
+
+## The tension
+
+VisLab is lighter than autoplay video embeds, but **canvas content is not crawlable text**. Search engines index your prose, headings, and figcaptions — not the simulation pixels.
+
+## Patterns that help
+
+1. **Prose first** — teach the concept in Markdown; use the widget as illustration
+2. **`<figure>` + `<figcaption>`** — short, keyword-aware caption
+3. **Visible titles** — chrome headers already expose an `h3`
+4. **Hidden summary** — widgets inject a screen-reader summary in the DOM (flagships keep it meaningful)
+
+## What not to do
+
+- Rely on the widget alone for ranking on “CPU pipeline explained”
+- Embed without any surrounding text
+- Replace a full tutorial with a single canvas
+
+## Optional future
+
+Static SVG / server-rendered snapshots for bots are on the later roadmap; not required for 0.1.0.

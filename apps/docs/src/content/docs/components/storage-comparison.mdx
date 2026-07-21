@@ -1,13 +1,45 @@
 ---
-title: Storage I/O latency
+title: Storage latency race
+description: Relative latency race across L1, NVMe, SSD, and HDD
 ---
 
 import { StorageComparison } from "@vislab/react";
 
-Relative latency race across storage tiers.
+Tokens race from CPU to storage tiers at speeds proportional to typical access latency. Use SimClock speed controls to slow the race for teaching.
 
-<StorageComparison client:visible />
+## Live demo
+
+<figure>
+  <StorageComparison client:visible />
+  <figcaption>
+    Relative I/O latency race across cache and storage tiers.
+  </figcaption>
+</figure>
+
+## When to use
+
+Latency intuition for storage hierarchies in database, systems, or performance posts.
+
+## Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `speed` | `number` | `1` | SimClock multiplier (0.1–10) |
+| `themeName` | `string` | `dark-premium` | Theme id |
+
+## Snippets
 
 ```astro
-<StorageComparison client:visible />
+---
+import { StorageComparison } from "@vislab/react";
+---
+<StorageComparison client:visible speed={0.5} />
 ```
+
+## Pedagogy notes
+
+Latencies are **illustrative ratios**, not micro-benchmarks of a specific machine. Pair with real numbers from your environment when precision matters.
+
+## Accessibility
+
+SimClock Pause / 0.1× / 1× / 10× and Space-to-pause when focused. Figcaption required for SEO and SR context.
