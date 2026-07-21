@@ -1,13 +1,16 @@
 {
   "name": "@vislab/exporter",
   "version": "0.0.0",
-  "private": true,
+  "description": "Optional Puppeteer frame capture for VisLab widgets (GIF/MP4 tooling). Not required for embeds.",
+  "keywords": ["vislab", "exporter", "puppeteer", "gif", "mp4"],
+  "private": false,
   "bin": {
     "vislab-export": "./dist/cli.js"
   },
+  "main": "./dist/cli.js",
+  "files": ["dist"],
   "scripts": {
-    "build": "tsup src/cli.ts --format cjs --clean --external puppeteer",
-    "export": "node dist/cli.js",
+    "build": "tsup src/cli.ts --format cjs --dts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -18,5 +21,14 @@
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "@types/node": "^20.19.43"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitmishra786/vislab.git",
+    "directory": "tools/exporter"
+  },
+  "license": "MIT"
 }

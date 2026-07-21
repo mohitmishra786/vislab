@@ -364,6 +364,29 @@ export function registerVislabWidget(entry: VislabComponentEntry): void {
   byId.set(entry.id, entry);
 }
 
+/**
+ * Render a visible error into a host element when a widget fails to mount.
+ * Used by React/data-vislab adapters so authors do not see a blank div.
+ */
+export function renderVislabMountError(
+  container: HTMLElement,
+  message: string,
+): void {
+  container.replaceChildren();
+  const box = document.createElement("div");
+  box.setAttribute("role", "alert");
+  box.setAttribute("data-vislab-error", "true");
+  box.style.fontFamily = '"JetBrains Mono", "Courier New", monospace';
+  box.style.fontSize = "13px";
+  box.style.padding = "16px";
+  box.style.border = "1px solid #ef4444";
+  box.style.background = "#1a0a0a";
+  box.style.color = "#fecaca";
+  box.style.borderRadius = "6px";
+  box.textContent = message;
+  container.appendChild(box);
+}
+
 export function createVislabComponent(
   globalName: string,
   container: HTMLElement,
@@ -371,7 +394,10 @@ export function createVislabComponent(
 ): VislabWidget {
   const entry = getVislabEntryByGlobalName(globalName);
   if (!entry) {
-    throw new Error(`Unknown VisLab component: ${globalName}`);
+    const known = vislabRegistry.map((e) => e.globalName).join(", ");
+    const message = `Unknown VisLab component: "${globalName}". Known: ${known}`;
+    renderVislabMountError(container, message);
+    throw new Error(message);
   }
   return entry.create(container, props);
 }

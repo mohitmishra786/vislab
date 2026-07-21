@@ -1,4 +1,4 @@
-import { createVislabComponent } from "./registry";
+import { createVislabComponent, renderVislabMountError } from "./registry";
 
 function parseProps(el: Element): Record<string, unknown> | undefined {
   const raw = el.getAttribute("data-props");
@@ -22,17 +22,30 @@ export function mountDataVislabRoots(root: ParentNode = document): void {
   nodes.forEach((el) => {
     if ((el as HTMLElement & { vislabMounted?: boolean }).vislabMounted) return;
     const name = el.getAttribute("data-vislab");
-    if (!name) return;
+    if (!name) {
+      renderVislabMountError(
+        el,
+        '[VisLab] data-vislab attribute is empty. Set e.g. data-vislab="CpuPipeline".',
+      );
+      return;
+    }
     const props = parseProps(el);
-    const widget = createVislabComponent(name, el, props);
-    (
-      el as HTMLElement & {
-        vislabMounted?: boolean;
-        vislabWidget?: { destroy(): void };
-      }
-    ).vislabMounted = true;
-    (el as HTMLElement & { vislabWidget?: { destroy(): void } }).vislabWidget =
-      widget;
+    try {
+      const widget = createVislabComponent(name, el, props);
+      (
+        el as HTMLElement & {
+          vislabMounted?: boolean;
+          vislabWidget?: { destroy(): void };
+        }
+      ).vislabMounted = true;
+      (
+        el as HTMLElement & { vislabWidget?: { destroy(): void } }
+      ).vislabWidget = widget;
+    } catch (err) {
+      // createVislabComponent already paints the error UI for unknown names
+      console.error("[VisLab] mount failed for", name, err);
+      (el as HTMLElement & { vislabMounted?: boolean }).vislabMounted = true;
+    }
   });
 }
 

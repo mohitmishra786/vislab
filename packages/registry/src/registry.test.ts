@@ -22,11 +22,14 @@ describe("vislabRegistry", () => {
     }
   });
 
-  it("createVislabComponent throws for unknown widget", () => {
+  it("createVislabComponent throws for unknown widget and paints alert", () => {
     const el = document.createElement("div");
     expect(() => createVislabComponent("NotAWidget", el)).toThrow(
       "Unknown VisLab component",
     );
+    const alert = el.querySelector("[data-vislab-error][role='alert']");
+    expect(alert).toBeTruthy();
+    expect(alert?.textContent).toMatch(/NotAWidget/);
   });
 });
 

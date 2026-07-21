@@ -12,6 +12,7 @@ export {
   getVislabEntryById,
   createVislabComponent,
   registerVislabWidget,
+  renderVislabMountError,
 } from "./registry";
 
 export { mountDataVislabRoots, autoMountVislabOnDomReady } from "./mount";

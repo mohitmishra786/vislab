@@ -3,7 +3,9 @@ import { AnimatedRect, Label, QueueViz, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
 
-export type SchedulerAlgorithm = "round-robin" | "cfs";
+import { type SchedulerAlgorithm, normalizeQuantum } from "./schedulerPolicy";
+
+export type { SchedulerAlgorithm } from "./schedulerPolicy";
 
 export type ProcessSchedulerOptions = {
   themeName?: string;
@@ -33,7 +35,7 @@ export class ProcessScheduler {
   constructor(container: HTMLElement, options?: ProcessSchedulerOptions) {
     this.container = container;
     this.algorithm = options?.algorithm ?? "round-robin";
-    this.quantum = options?.quantum ?? 1000;
+    this.quantum = normalizeQuantum(options?.quantum);
 
     const spawnBtn = document.createElement("button");
     spawnBtn.type = "button";

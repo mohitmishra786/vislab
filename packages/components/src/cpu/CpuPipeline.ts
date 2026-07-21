@@ -1,6 +1,7 @@
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import { detectDataHazard } from "./pipelineHazards";
 
 const DEFAULT_STAGES = ["IF", "ID", "EX", "MEM", "WB"];
 
@@ -186,41 +187,41 @@ export class CpuPipeline {
   }
 
   private checkHazard() {
-    const exIdx = this.stages.findIndex(
-      (s) => s === "EX" || s.toUpperCase() === "EX",
+    const result = detectDataHazard(
+      this.stages,
+      this.instructions.map((i) => ({
+        id: i.id,
+        stageIndex: i.stageIndex,
+        label: i.label,
+      })),
     );
-    const memIdx = this.stages.findIndex(
-      (s) => s === "MEM" || s.toUpperCase() === "MEM",
-    );
-    if (exIdx < 0 || memIdx < 0) return;
-
-    const inEx = this.instructions.find((i) => i.stageIndex === exIdx);
-    const inMem = this.instructions.find((i) => i.stageIndex === memIdx);
-    if (inEx && inMem && inEx.label === inMem.label) {
-      if (this.stallLabel) {
-        this.stallLabel.text = "⚠ data hazard — stall bubble inserted";
-      }
-      const stall = new AnimatedRect(
-        `stall-${Date.now()}`,
-        this.stageCenters[exIdx].x - 10,
-        this.stageCenters[exIdx].y - 8,
-        20,
-        16,
-      );
-      stall.label = "⊘";
-      stall.fillColor = "#ef4444";
-      stall.strokeColor = "#f87171";
-      stall.labelColor = "#fff";
-      stall.labelFontPx = 12;
-      this.scene.addEntity(stall);
-      this.scene.scheduler.schedule({
-        id: `remove-stall-${stall.id}`,
-        triggerTime: this.scene.clock.simTime + 800,
-        execute: () => this.scene.removeEntity(stall.id),
-      });
-    } else if (this.stallLabel) {
-      this.stallLabel.text = "";
+    if (result.kind !== "data" || result.stallStageIndex === null) {
+      if (this.stallLabel) this.stallLabel.text = "";
+      return;
     }
+
+    const exIdx = result.stallStageIndex;
+    if (this.stallLabel) {
+      this.stallLabel.text = result.message;
+    }
+    const stall = new AnimatedRect(
+      `stall-${Date.now()}`,
+      this.stageCenters[exIdx].x - 10,
+      this.stageCenters[exIdx].y - 8,
+      20,
+      16,
+    );
+    stall.label = "⊘";
+    stall.fillColor = "#ef4444";
+    stall.strokeColor = "#f87171";
+    stall.labelColor = "#fff";
+    stall.labelFontPx = 12;
+    this.scene.addEntity(stall);
+    this.scene.scheduler.schedule({
+      id: `remove-stall-${stall.id}`,
+      triggerTime: this.scene.clock.simTime + 800,
+      execute: () => this.scene.removeEntity(stall.id),
+    });
   }
 
   private advancePipeline() {

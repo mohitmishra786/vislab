@@ -1,9 +1,20 @@
 {
   "name": "@vislab/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "CLI to build, preview, and scaffold VisLab visualization embeds",
+  "keywords": ["vislab", "cli", "embed", "systems-visualization"],
   "bin": {
     "vislab": "./dist/index.js"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs --dts",
     "typecheck": "tsc --noEmit"
