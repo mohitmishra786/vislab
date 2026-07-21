@@ -418,3 +418,30 @@ export function createVislabComponent(
   }
   return entry.create(container, props);
 }
+
+/**
+ * Lazy-create a widget by dynamically importing only its ESM chunk (#51).
+ * Prefer this in bundlers / modern ESM pages when embedding a single widget.
+ * Falls back to synchronous registry create if the loader is unavailable.
+ */
+export async function createVislabComponentAsync(
+  globalName: string,
+  container: HTMLElement,
+  props?: Record<string, unknown>,
+): Promise<VislabWidget> {
+  const entry = getVislabEntryByGlobalName(globalName);
+  if (!entry) {
+    const known = vislabRegistry.map((e) => e.globalName).join(", ");
+    const message = `Unknown VisLab component: "${globalName}". Known: ${known}`;
+    renderVislabMountError(container, message);
+    throw new Error(message);
+  }
+  try {
+    const { loadWidgetClass } = await import("./loaders");
+    const Ctor = await loadWidgetClass(globalName);
+    return new Ctor(container, props);
+  } catch {
+    // Registry already holds eager create() for IIFE / full-bundle paths
+    return entry.create(container, props);
+  }
+}
