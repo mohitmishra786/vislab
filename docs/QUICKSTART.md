@@ -97,7 +97,7 @@ pnpm --filter @vislab/cli exec vislab build -o ./public/vislab
 ></vislab-storage-comparison>
 ```
 
-**Bundle size (gzip, measured):** VisLab IIFE ≈ **16 KB**; VisLabEmbeds IIFE ≈ **19 KB**.
+**Bundle size (gzip, measured):** VisLab IIFE ≈ **22 KB**; VisLabEmbeds IIFE ≈ **28 KB**. Per-widget ESM graphs stay under the CI budget (≤36 KB gzip).
 
 **SRI hashes** (recompute after every release with `pnpm run sri`): see [docs/SRI.md](./SRI.md).
 
