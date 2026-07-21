@@ -126,19 +126,24 @@ export function createArticleChrome(
   header.style.flexWrap = "nowrap";
   header.style.overflow = "hidden";
 
+  // Fixed header heights (not min-height) so full-widget screenshots match across OS
   if (variant === "diagram") {
-    header.style.padding = "6px 10px";
-    header.style.minHeight = "40px";
+    header.style.padding = "0 10px";
+    header.style.height = "40px";
+    header.style.boxSizing = "border-box";
   } else if (variant === "toolbar") {
-    header.style.padding = "10px 14px";
-    header.style.minHeight = "48px";
+    header.style.padding = "0 14px";
+    header.style.height = "48px";
+    header.style.boxSizing = "border-box";
   } else if (variant === "terminal") {
-    header.style.padding = "8px 12px";
-    header.style.minHeight = "44px";
+    header.style.padding = "0 12px";
+    header.style.height = "44px";
+    header.style.boxSizing = "border-box";
     header.style.backgroundColor = "#080808";
   } else {
-    header.style.padding = "20px 24px";
-    header.style.minHeight = "64px";
+    header.style.padding = "0 24px";
+    header.style.height = "56px";
+    header.style.boxSizing = "border-box";
   }
 
   const titleEl = document.createElement("h3");

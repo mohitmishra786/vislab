@@ -36,7 +36,7 @@ jobs:
         # smoke/mobile validate behavior without Mac/Linux font pixel flakiness.
         run: pnpm --filter demo-blog exec playwright test e2e/smoke.spec.ts e2e/mobile.spec.ts
       - name: E2E visual regression (chromium)
-        # Full-widget chrome (titles + controls + canvas). Higher threshold for host font drift.
+        # Full-widget chrome (titles + controls + canvas). Baselines are platform-tagged (*-linux.png).
         run: pnpm --filter demo-blog exec playwright test e2e/visual.spec.ts --project=chromium
         env:
-          VISUAL_MAX_DIFF: "0.28"
+          VISUAL_MAX_DIFF: "0.10"

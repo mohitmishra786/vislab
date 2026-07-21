@@ -2,9 +2,11 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  // Single snapshot set for CI (linux) and local dev — avoids *-darwin vs *-linux drift.
+  // Platform-specific baselines: full-widget chrome matches host fonts (darwin vs linux).
+  // Generate with: playwright test e2e/visual.spec.ts --update-snapshots
+  // CI (ubuntu) needs *-linux.png; local Mac uses *-darwin.png.
   snapshotPathTemplate:
-    "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}",
+    "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}-{platform}{ext}",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
