@@ -11,7 +11,7 @@
   "dependencies": {
     "@astrojs/react": "^5.0.7",
     "@astrojs/mdx": "^5.0.4",
-    "astro": "^6.4.8",
+    "astro": "^7.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@vislab/react": "workspace:*"
