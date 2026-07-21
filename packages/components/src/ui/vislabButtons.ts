@@ -28,7 +28,6 @@ export function styleVislabButton(
   el.style.border = `1px solid ${t.border}`;
   el.style.whiteSpace = "nowrap";
 
-
   if (tone === "primary") {
     el.style.backgroundColor = t.accent1;
     el.style.color = t.bg;
