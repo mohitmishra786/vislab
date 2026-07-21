@@ -12,7 +12,10 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm run build && changeset publish",
-    "check:bundle-size": "node scripts/check-bundle-size.mjs"
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
+    "docs:widgets": "node scripts/generate-widget-docs.mjs",
+    "sri": "node scripts/compute-sri.mjs",
+    "media:capture": "node scripts/capture-readme-media.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

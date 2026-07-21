@@ -48,4 +48,6 @@ test("storage widget has interactive canvas", async ({ page }) => {
   await expect(storage).toBeVisible({ timeout: 15_000 });
   const canvas = storage.locator("[data-vislab-canvas] canvas, canvas").first();
   await expect(canvas).toBeVisible();
+  await expect(storage.locator("[data-vislab-simclock]")).toBeVisible();
+  await expect(canvas).toHaveAttribute("role", "img");
 });

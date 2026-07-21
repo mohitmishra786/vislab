@@ -29,6 +29,7 @@ import type { VislabComponentEntry, VislabWidget } from "./types";
 export const vislabRegistry: VislabComponentEntry[] = [
   {
     id: "storage-comparison",
+    maturity: "flagship",
     globalName: "StorageComparison",
     displayName: "Storage latency race",
     category: "storage",
@@ -52,6 +53,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cpu-pipeline",
+    maturity: "flagship",
     globalName: "CpuPipeline",
     displayName: "CPU pipeline",
     category: "cpu",
@@ -81,6 +83,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cache-simulator",
+    maturity: "flagship",
     globalName: "CacheSimulator",
     displayName: "Cache hierarchy",
     category: "cpu",
@@ -110,6 +113,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "branch-predictor",
+    maturity: "beta",
     globalName: "BranchPredictor",
     displayName: "Branch predictor",
     category: "cpu",
@@ -120,6 +124,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "tlb-walk",
+    maturity: "beta",
     globalName: "TLBWalk",
     displayName: "TLB / page walk",
     category: "cpu",
@@ -130,6 +135,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "process-scheduler",
+    maturity: "flagship",
     globalName: "ProcessScheduler",
     displayName: "Process scheduler",
     category: "os",
@@ -168,6 +174,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "virtual-memory",
+    maturity: "beta",
     globalName: "VirtualMemory",
     displayName: "Virtual memory",
     category: "os",
@@ -189,6 +196,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "syscall-trace",
+    maturity: "beta",
     globalName: "SyscallTrace",
     displayName: "Syscall trace",
     category: "os",
@@ -199,6 +207,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "inode-tree",
+    maturity: "beta",
     globalName: "InodeTree",
     displayName: "Inode tree",
     category: "os",
@@ -209,6 +218,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "sort-race",
+    maturity: "flagship",
     globalName: "SortRace",
     displayName: "Sorting race",
     category: "algorithms",
@@ -237,6 +247,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "btree-ops",
+    maturity: "beta",
     globalName: "BTreeOps",
     displayName: "B-tree ops",
     category: "algorithms",
@@ -247,6 +258,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "graph-traversal",
+    maturity: "beta",
     globalName: "GraphTraversal",
     displayName: "Graph traversal",
     category: "algorithms",
@@ -268,6 +280,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "hash-collision",
+    maturity: "beta",
     globalName: "HashCollision",
     displayName: "Hash collisions",
     category: "algorithms",
@@ -278,6 +291,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "lexer",
+    maturity: "beta",
     globalName: "Lexer",
     displayName: "Lexer",
     category: "compiler",
@@ -299,6 +313,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "parser",
+    maturity: "beta",
     globalName: "Parser",
     displayName: "Parser",
     category: "compiler",
@@ -309,6 +324,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cfg-builder",
+    maturity: "beta",
     globalName: "CFGBuilder",
     displayName: "CFG builder",
     category: "compiler",
@@ -319,6 +335,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "register-allocator",
+    maturity: "beta",
     globalName: "RegisterAllocator",
     displayName: "Register allocation",
     category: "compiler",

@@ -3,9 +3,15 @@ import { AnimatedRect, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class BTreeOps {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private root: AnimatedRect;
@@ -21,17 +27,21 @@ export class BTreeOps {
     searchBtn.type = "button";
     searchBtn.textContent = "Search step";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "B-tree search",
       variant: "diagram",
       canvasHeight: "280px",
       testId: "btree-ops",
       themeName: options?.themeName,
-      headerActions: searchBtn,
+      headerActions: [searchBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(searchBtn, t, "primary");
@@ -44,6 +54,16 @@ export class BTreeOps {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "B-tree search",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "B-tree search",
+    });
 
     this.root = new AnimatedRect("r", 280, 40, 110, 40);
     this.root.label = "[ 40 | 80 ]";
@@ -97,6 +117,7 @@ export class BTreeOps {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

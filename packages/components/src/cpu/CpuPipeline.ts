@@ -1,7 +1,11 @@
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
-import { createSimClockControls } from "../ui/simClockControls";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 import { detectDataHazard } from "./pipelineHazards";
 
 const DEFAULT_STAGES = ["IF", "ID", "EX", "MEM", "WB"];
@@ -29,8 +33,7 @@ export class CpuPipeline {
   private nextInstNum = 1;
   private stallLabel: Label | null = null;
   private running = false;
-  private clockControls: ReturnType<typeof createSimClockControls> | null =
-    null;
+  private runtime: WidgetRuntime | null = null;
 
   constructor(container: HTMLElement, options?: CpuPipelineOptions) {
     this.container = container;
@@ -42,14 +45,14 @@ export class CpuPipeline {
     const stepBtn = document.createElement("button");
     stepBtn.type = "button";
     stepBtn.textContent = "Step";
-    const clockHost = document.createElement("div");
+    const clockHost = createClockHost();
 
     const {
       wrapper,
       prepareCanvas,
       theme: t,
-      setSummary,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "CPU pipeline",
       variant: "diagram",
@@ -68,6 +71,25 @@ export class CpuPipeline {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const wantAuto = options?.autoPlay !== false && !reducedMotion;
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "CPU pipeline",
+      startPaused: !wantAuto,
+      onPauseChange: (paused) => {
+        this.running = !paused;
+        if (!paused) {
+          this.scheduleFetch();
+          this.scheduleAdvance();
+        }
+      },
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "CPU pipeline",
+    });
 
     const stageWidth = 64;
     const stageHeight = 44;
@@ -117,25 +139,10 @@ export class CpuPipeline {
     this.stallLabel.font = '11px "JetBrains Mono", monospace';
     this.scene.addEntity(this.stallLabel);
 
-    const wantAuto = options?.autoPlay !== false && !reducedMotion;
-
-    this.clockControls = createSimClockControls(this.scene, t, {
-      keyboardRoot: wrapper,
-      startPaused: !wantAuto,
-      onPauseChange: (paused) => {
-        this.running = !paused;
-        if (!paused) {
-          this.scheduleFetch();
-          this.scheduleAdvance();
-        }
-      },
-    });
-    clockHost.appendChild(this.clockControls.root);
-
     stepBtn.addEventListener("click", () => {
       this.scene.clock.pause();
       this.running = false;
-      this.clockControls?.refresh();
+      this.runtime?.clock.refresh();
       this.advancePipeline();
     });
 
@@ -247,7 +254,7 @@ export class CpuPipeline {
   }
 
   public destroy() {
-    this.clockControls?.dispose();
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

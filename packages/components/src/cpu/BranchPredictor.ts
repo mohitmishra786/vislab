@@ -3,9 +3,15 @@ import { AnimatedRect, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class BranchPredictor {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private stateLabel: Label;
@@ -22,17 +28,21 @@ export class BranchPredictor {
     notTakenBtn.type = "button";
     notTakenBtn.textContent = "Not taken";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "2-bit saturating branch predictor",
       variant: "diagram",
       canvasHeight: "220px",
       testId: "branch-predictor",
       themeName: options?.themeName,
-      headerActions: [takenBtn, notTakenBtn],
+      headerActions: [takenBtn, notTakenBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(takenBtn, t, "primary");
@@ -46,6 +56,16 @@ export class BranchPredictor {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "2-bit saturating branch predictor",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "2-bit saturating branch predictor",
+    });
 
     this.stateLabel = new Label("state-lbl", "Prediction: Not Taken", 280, 24);
     this.stateLabel.font = '12px "JetBrains Mono", monospace';
@@ -88,6 +108,7 @@ export class BranchPredictor {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

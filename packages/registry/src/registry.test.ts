@@ -42,10 +42,28 @@ describe("widget lifecycle", () => {
       expect(
         container.querySelector("[data-vislab-widget], canvas"),
       ).toBeTruthy();
+      // SimClock strip present on all widgets after runtime wiring
+      expect(container.querySelector("[data-vislab-simclock]")).toBeTruthy();
+      expect(container.querySelector('canvas[role="img"]')).toBeTruthy();
+      expect(container.querySelector("[data-vislab-summary]")).toBeTruthy();
       expect(() => widget.destroy()).not.toThrow();
+      // Full dispose: no leftover widget chrome or canvas
+      expect(container.innerHTML.trim()).toBe("");
+      expect(container.querySelector("canvas")).toBeNull();
+      expect(container.querySelector("[data-vislab-widget]")).toBeNull();
       container.remove();
     });
   }
+
+  it("every entry declares maturity", () => {
+    for (const entry of vislabRegistry) {
+      expect(entry.maturity === "flagship" || entry.maturity === "beta").toBe(
+        true,
+      );
+    }
+    const flagships = vislabRegistry.filter((e) => e.maturity === "flagship");
+    expect(flagships.length).toBe(5);
+  });
 });
 
 describe("prop parsing", () => {

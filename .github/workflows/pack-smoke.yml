@@ -1,0 +1,42 @@
+name: Pack install smoke
+
+# Consumer-style install without npm publish: pack workspace tarballs and install in a temp app.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  pack-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: Pack @vislab packages
+        run: |
+          mkdir -p /tmp/vislab-packs
+          for pkg in core components registry react web-components; do
+            pnpm --filter "@vislab/$pkg" pack --pack-destination /tmp/vislab-packs
+          done
+          ls -la /tmp/vislab-packs
+      - name: Install packs into fresh project
+        run: |
+          mkdir -p /tmp/vislab-consumer
+          cd /tmp/vislab-consumer
+          npm init -y
+          # Install from local tarballs (order: deps first)
+          CORE=$(ls /tmp/vislab-packs/vislab-core-*.tgz | head -1)
+          COMP=$(ls /tmp/vislab-packs/vislab-components-*.tgz | head -1)
+          REG=$(ls /tmp/vislab-packs/vislab-registry-*.tgz | head -1)
+          REACT=$(ls /tmp/vislab-packs/vislab-react-*.tgz | head -1)
+          WC=$(ls /tmp/vislab-packs/vislab-web-components-*.tgz | head -1)
+          npm install "$CORE" "$COMP" "$REG" react@18 react-dom@18
+          npm install "$REACT" "$WC"
+          node -e "const r=require('@vislab/registry'); if(!r.vislabRegistry||r.vislabRegistry.length!==17) process.exit(1); console.log('registry ok', r.vislabRegistry.length)"

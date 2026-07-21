@@ -99,6 +99,8 @@ pnpm --filter @vislab/cli exec vislab build -o ./public/vislab
 
 **Bundle size (gzip, measured):** VisLab IIFE ≈ **16 KB**; VisLabEmbeds IIFE ≈ **19 KB**.
 
+**SRI hashes** (recompute after every release with `pnpm run sri`): see [docs/SRI.md](./SRI.md).
+
 ---
 
 ## Path 3: Jekyll

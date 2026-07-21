@@ -3,9 +3,15 @@ import { AnimatedRect, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class HashCollision {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private buckets: AnimatedRect[] = [];
@@ -20,17 +26,21 @@ export class HashCollision {
     insertBtn.type = "button";
     insertBtn.textContent = "Insert next";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Hash table — chaining",
       variant: "toolbar",
       canvasHeight: "300px",
       testId: "hash-collision",
       themeName: options?.themeName,
-      headerActions: insertBtn,
+      headerActions: [insertBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(insertBtn, t, "primary");
@@ -43,6 +53,16 @@ export class HashCollision {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Hash table — chaining",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Hash table — chaining",
+    });
 
     for (let i = 0; i < 8; i++) {
       const bucket = new AnimatedRect(`b-${i}`, 60, 40 + i * 30, 70, 24);
@@ -97,6 +117,7 @@ export class HashCollision {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

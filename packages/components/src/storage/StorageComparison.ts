@@ -1,7 +1,11 @@
 import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
-import { createSimClockControls } from "../ui/simClockControls";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type StorageComparisonOptions = {
   themeName?: string;
@@ -11,8 +15,7 @@ export type StorageComparisonOptions = {
 export class StorageComparison {
   private scene: Scene;
   private container: HTMLElement;
-  private clockControls: ReturnType<typeof createSimClockControls> | null =
-    null;
+  private runtime: WidgetRuntime | null = null;
 
   constructor(container: HTMLElement, options?: StorageComparisonOptions) {
     this.container = container;
@@ -21,14 +24,14 @@ export class StorageComparison {
     timeIOBtn.type = "button";
     timeIOBtn.textContent = "Trigger I/O";
 
-    const clockHost = document.createElement("div");
+    const clockHost = createClockHost();
 
     const {
       wrapper,
       prepareCanvas,
       theme: t,
-      setSummary,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Storage latency race",
       variant: "article",
@@ -46,6 +49,16 @@ export class StorageComparison {
     const canvas = prepareCanvas({ height: "400px" });
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Storage latency race",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Storage latency race",
+    });
 
     const cpuBlock = new AnimatedRect("cpu", 50, 50, 150, 300);
     cpuBlock.fillColor = t.surface;
@@ -180,13 +193,6 @@ export class StorageComparison {
     if (options?.speed) {
       this.scene.clock.speed = Math.max(0.1, Math.min(10, options.speed));
     }
-
-    this.clockControls = createSimClockControls(this.scene, t, {
-      keyboardRoot: wrapper,
-      startPaused: reducedMotion,
-    });
-    clockHost.appendChild(this.clockControls.root);
-
     setSummary(
       "Relative latency race: L1 cache, NVMe, SSD, and HDD tokens travel at speeds proportional to typical access latency.",
     );
@@ -194,7 +200,7 @@ export class StorageComparison {
   }
 
   public destroy() {
-    this.clockControls?.dispose();
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

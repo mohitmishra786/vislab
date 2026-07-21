@@ -1,11 +1,61 @@
 ---
 title: Syscall trace
+description: Syscall trace systems visualization widget.
 ---
 
-import { SyscallTrace } from '@vislab/react';
+import { SyscallTrace } from "@vislab/react";
 
-<SyscallTrace client:visible />
+Syscall trace systems visualization widget.
 
-``astro
-<SyscallTrace client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <SyscallTrace client:visible />
+  <figcaption>Syscall trace interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { SyscallTrace } from "@vislab/react";
+---
+<figure>
+  <SyscallTrace client:visible />
+  <figcaption>Syscall trace</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="SyscallTrace" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="syscall-trace" component="SyscallTrace" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `syscall-trace`
+- **globalName:** `SyscallTrace`
+- **category:** `os`
+- **custom element:** `<vislab-syscall-trace>`

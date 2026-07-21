@@ -1,11 +1,62 @@
 ---
 title: Virtual memory
+description: Virtual memory systems visualization widget.
 ---
 
-import { VirtualMemory } from '@vislab/react';
+import { VirtualMemory } from "@vislab/react";
 
-<VirtualMemory client:visible />
+Virtual memory systems visualization widget.
 
-``astro
-<VirtualMemory client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <VirtualMemory client:visible />
+  <figcaption>Virtual memory interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+| `pageCount` | `number` | yes | Virtual pages to display (4–12) |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { VirtualMemory } from "@vislab/react";
+---
+<figure>
+  <VirtualMemory client:visible />
+  <figcaption>Virtual memory</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="VirtualMemory" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="virtual-memory" component="VirtualMemory" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `virtual-memory`
+- **globalName:** `VirtualMemory`
+- **category:** `os`
+- **custom element:** `<vislab-virtual-memory>`

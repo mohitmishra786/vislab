@@ -2,6 +2,11 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type GraphTraversalOptions = {
   themeName?: string;
@@ -26,6 +31,7 @@ const POSITIONS: Record<string, { x: number; y: number }> = {
 
 export class GraphTraversal {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private nodes: Map<string, AnimatedRect> = new Map();
@@ -44,17 +50,21 @@ export class GraphTraversal {
     algoBtn.type = "button";
     algoBtn.textContent = this.algorithm.toUpperCase();
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: `Graph — ${this.algorithm.toUpperCase()} traversal`,
       variant: "diagram",
       canvasHeight: "280px",
       testId: "graph-traversal",
       themeName: options?.themeName,
-      headerActions: [stepBtn, algoBtn],
+      headerActions: [stepBtn, algoBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(stepBtn, t, "primary");
@@ -68,6 +78,16 @@ export class GraphTraversal {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "VisLab widget",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "VisLab widget",
+    });
 
     for (const [id, p] of Object.entries(POSITIONS)) {
       const r = new AnimatedRect(id, p.x, p.y, 44, 44);
@@ -131,6 +151,7 @@ export class GraphTraversal {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -247,7 +247,20 @@ export default function StudioWorkbench() {
                   : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/80"
               }`}
             >
-              <div className="font-medium text-slate-200">{e.displayName}</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-slate-200">
+                  {e.displayName}
+                </span>
+                <span
+                  className={`text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${
+                    e.maturity === "flagship"
+                      ? "border-cyan-500/50 text-cyan-300 bg-cyan-500/10"
+                      : "border-amber-500/40 text-amber-200/90 bg-amber-500/10"
+                  }`}
+                >
+                  {e.maturity === "flagship" ? "flagship" : "beta"}
+                </span>
+              </div>
               <div className="text-xs text-slate-500 mt-1 font-mono">
                 {e.globalName}
               </div>

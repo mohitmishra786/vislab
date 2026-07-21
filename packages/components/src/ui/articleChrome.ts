@@ -221,7 +221,20 @@ export function createArticleChrome(
     descriptionId: summaryId,
   };
 
-  // Auto-decorate any canvas widgets append into canvasMount
+  // Auto-decorate any canvas appended into canvasMount (sync — works in happy-dom tests)
+  const nativeAppend = canvasMount.appendChild.bind(canvasMount);
+  canvasMount.appendChild = (<T extends Node>(node: T): T => {
+    const result = nativeAppend(node);
+    if (node instanceof HTMLCanvasElement) {
+      decorateCanvasA11y(node, a11yOpts);
+    } else if (node instanceof HTMLElement) {
+      node
+        .querySelectorAll("canvas")
+        .forEach((c) => decorateCanvasA11y(c, a11yOpts));
+    }
+    return result;
+  }) as typeof canvasMount.appendChild;
+
   if (typeof MutationObserver !== "undefined") {
     const obs = new MutationObserver((records) => {
       for (const rec of records) {

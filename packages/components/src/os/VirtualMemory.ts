@@ -2,6 +2,11 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type VirtualMemoryOptions = {
   themeName?: string;
@@ -10,6 +15,7 @@ export type VirtualMemoryOptions = {
 
 export class VirtualMemory {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private pageCount: number;
@@ -30,17 +36,21 @@ export class VirtualMemory {
     faultBtn.type = "button";
     faultBtn.textContent = "Page fault";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Virtual memory — page table walk",
       variant: "terminal",
       canvasHeight: "360px",
       testId: "virtual-memory",
       themeName: options?.themeName,
-      headerActions: [stepBtn, faultBtn],
+      headerActions: [stepBtn, faultBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(stepBtn, t, "primary");
@@ -54,6 +64,16 @@ export class VirtualMemory {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Virtual memory — page table walk",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Virtual memory — page table walk",
+    });
 
     const ptLabel = new Label("pt", "Page Table", 280, 28);
     ptLabel.color = t.accent2;
@@ -157,6 +177,7 @@ export class VirtualMemory {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -17,7 +17,15 @@ export default defineConfig({
     locale: "en-US",
     reducedMotion: "reduce",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // WebKit for cross-engine smoke (visual snapshots still chromium-only paths)
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+      testMatch: /smoke\.spec\.ts|mobile\.spec\.ts/,
+    },
+  ],
   webServer: {
     command: "pnpm exec astro preview --host 127.0.0.1 --port 4322",
     cwd: __dirname,

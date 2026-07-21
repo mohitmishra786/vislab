@@ -2,11 +2,17 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type LexerOptions = { themeName?: string; source?: string };
 
 export class Lexer {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private sourceLabel: Label;
   private pointer: AnimatedRect;
@@ -23,17 +29,21 @@ export class Lexer {
     stepBtn.type = "button";
     stepBtn.textContent = "Step";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Lexer trace",
       variant: "terminal",
       canvasHeight: "220px",
       testId: "lexer",
       themeName: options?.themeName,
-      headerActions: stepBtn,
+      headerActions: [stepBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(stepBtn, t, "ghost");
@@ -47,6 +57,16 @@ export class Lexer {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Lexer trace",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Lexer trace",
+    });
 
     this.sourceLabel = new Label("src", this.sourceText, 50, 52);
     this.sourceLabel.align = "left";
@@ -94,6 +114,7 @@ export class Lexer {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -2,6 +2,11 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 import { type CachePolicy, pickVictimIndex, touchOnHit } from "./cachePolicy";
 
 export type { CachePolicy } from "./cachePolicy";
@@ -23,6 +28,7 @@ type CacheLine = {
 
 export class CacheSimulator {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private l1: CacheLine[] = [];
   private l2: CacheLine[] = [];
@@ -48,17 +54,21 @@ export class CacheSimulator {
     policyBtn.type = "button";
     policyBtn.textContent = `Policy: ${this.policy.toUpperCase()}`;
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Cache hierarchy",
       variant: "toolbar",
       canvasHeight: "400px",
       testId: "cache-simulator",
       themeName: options?.themeName,
-      headerActions: [policyBtn, requestBtn],
+      headerActions: [policyBtn, requestBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(requestBtn, t, "primary");
@@ -74,6 +84,16 @@ export class CacheSimulator {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Cache hierarchy",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Cache hierarchy",
+    });
 
     this.layoutArchitecture();
     this.statsLabel = new Label("stats", "Hit rate: —", 12, 380);
@@ -243,6 +263,7 @@ export class CacheSimulator {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

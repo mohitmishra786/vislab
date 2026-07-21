@@ -3,9 +3,15 @@ import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class TLBWalk {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private tlb: AnimatedRect;
@@ -24,17 +30,21 @@ export class TLBWalk {
     missBtn.type = "button";
     missBtn.textContent = "TLB miss (walk)";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "TLB / page walk",
       variant: "toolbar",
       canvasHeight: "320px",
       testId: "tlb-walk",
       themeName: options?.themeName,
-      headerActions: [hitBtn, missBtn],
+      headerActions: [hitBtn, missBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(hitBtn, t, "primary");
@@ -48,6 +58,16 @@ export class TLBWalk {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "TLB / page walk",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "TLB / page walk",
+    });
 
     this.tlb = new AnimatedRect("tlb", 40, 120, 100, 70);
     this.tlb.label = "TLB";
@@ -159,6 +179,7 @@ export class TLBWalk {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

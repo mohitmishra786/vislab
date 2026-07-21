@@ -14,6 +14,13 @@ _"Complexity is the enemy of understanding."_
 
 </div>
 
+<p align="center">
+  <img src="docs/media/storage-comparison.png" alt="Storage latency race widget" width="720" />
+</p>
+<p align="center">
+  <img src="docs/media/cpu-pipeline.png" alt="CPU pipeline widget with SimClock controls" width="720" />
+</p>
+
 ---
 
 ## Why VisLab Widgets?
@@ -32,7 +39,7 @@ Aesthetic: flat geometry, monospace (JetBrains Mono), no gradients — inspired 
 | ---- | ----- |
 | npm `@vislab/*` | **Not published yet** — use monorepo install |
 | GitHub Releases | Pending first `0.1.0` |
-| Bundle gzip | VisLab ≈ **16 KB** · Embeds ≈ **19 KB** (CI budgeted) |
+| Bundle gzip | VisLab ≈ **20.5 KB** · Embeds ≈ **23 KB** (CI budgeted; SimClock+export chrome) |
 | Support | **Tier 1:** React + static HTML · **Tier 2:** Jekyll · **Tier 3:** Puppeteer exporter |
 
 ## Packages

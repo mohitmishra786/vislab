@@ -3,9 +3,15 @@ import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class Parser {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private nodes: AnimatedRect[] = [];
@@ -19,17 +25,21 @@ export class Parser {
     stepBtn.type = "button";
     stepBtn.textContent = "Build AST step";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Parser — AST construction",
       variant: "terminal",
       canvasHeight: "300px",
       testId: "parser",
       themeName: options?.themeName,
-      headerActions: stepBtn,
+      headerActions: [stepBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(stepBtn, t, "ghost");
@@ -42,6 +52,16 @@ export class Parser {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Parser — AST construction",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Parser — AST construction",
+    });
 
     const defs = [
       { id: "ast-rt", x: 280, y: 40, label: "Program" },
@@ -82,6 +102,7 @@ export class Parser {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

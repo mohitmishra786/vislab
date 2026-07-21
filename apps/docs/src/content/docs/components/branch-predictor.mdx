@@ -1,11 +1,61 @@
 ---
 title: Branch predictor
+description: Branch predictor systems visualization widget.
 ---
 
-import { BranchPredictor } from '@vislab/react';
+import { BranchPredictor } from "@vislab/react";
 
-<BranchPredictor client:visible />
+Branch predictor systems visualization widget.
 
-``astro
-<BranchPredictor client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <BranchPredictor client:visible />
+  <figcaption>Branch predictor interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { BranchPredictor } from "@vislab/react";
+---
+<figure>
+  <BranchPredictor client:visible />
+  <figcaption>Branch predictor</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="BranchPredictor" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="branch-predictor" component="BranchPredictor" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `branch-predictor`
+- **globalName:** `BranchPredictor`
+- **category:** `cpu`
+- **custom element:** `<vislab-branch-predictor>`

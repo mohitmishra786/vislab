@@ -1,11 +1,62 @@
 ---
 title: Graph traversal
+description: Graph traversal systems visualization widget.
 ---
 
-import { GraphTraversal } from '@vislab/react';
+import { GraphTraversal } from "@vislab/react";
 
-<GraphTraversal client:visible />
+Graph traversal systems visualization widget.
 
-``astro
-<GraphTraversal client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <GraphTraversal client:visible />
+  <figcaption>Graph traversal interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+| `algorithm` | `string` | yes | "bfs" or "dfs" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { GraphTraversal } from "@vislab/react";
+---
+<figure>
+  <GraphTraversal client:visible />
+  <figcaption>Graph traversal</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="GraphTraversal" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="graph-traversal" component="GraphTraversal" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `graph-traversal`
+- **globalName:** `GraphTraversal`
+- **category:** `algorithms`
+- **custom element:** `<vislab-graph-traversal>`

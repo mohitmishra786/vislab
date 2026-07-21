@@ -22,6 +22,23 @@ export default defineConfig({
       title: "VisLab Widgets",
       description:
         "Embeddable systems & CS education canvas simulations for technical writing (CPU, cache, OS, storage)",
+      head: [
+        {
+          tag: "meta",
+          attrs: {
+            property: "og:image",
+            content: new URL(
+              "og-preview.png",
+              // served from public/ after copy — use site-relative path via absolute site
+              `${site.replace(/\/$/, "")}/og-preview.png`,
+            ).href,
+          },
+        },
+        {
+          tag: "meta",
+          attrs: { name: "twitter:card", content: "summary_large_image" },
+        },
+      ],
       social: [
         {
           icon: "github",
