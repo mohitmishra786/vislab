@@ -32,7 +32,6 @@ export class CFGBuilder {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Control-flow graph",
       variant: "diagram",

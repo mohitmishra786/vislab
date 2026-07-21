@@ -35,7 +35,6 @@ export class BranchPredictor {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "2-bit saturating branch predictor",
       variant: "diagram",

@@ -32,7 +32,6 @@ export class Parser {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Parser — AST construction",
       variant: "terminal",

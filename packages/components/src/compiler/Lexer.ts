@@ -36,7 +36,6 @@ export class Lexer {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Lexer trace",
       variant: "terminal",

@@ -61,7 +61,6 @@ export class CacheSimulator {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Cache hierarchy",
       variant: "toolbar",

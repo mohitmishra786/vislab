@@ -57,7 +57,6 @@ export class ProcessScheduler {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title:
         this.algorithm === "cfs" ? "CFS scheduler" : "Round-robin scheduler",

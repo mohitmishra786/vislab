@@ -37,7 +37,6 @@ export class TLBWalk {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "TLB / page walk",
       variant: "toolbar",

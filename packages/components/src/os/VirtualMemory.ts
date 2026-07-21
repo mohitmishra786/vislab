@@ -43,7 +43,6 @@ export class VirtualMemory {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Virtual memory — page table walk",
       variant: "terminal",

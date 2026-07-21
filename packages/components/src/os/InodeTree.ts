@@ -33,7 +33,6 @@ export class InodeTree {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Inode tree — path resolution",
       variant: "terminal",

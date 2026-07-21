@@ -136,7 +136,7 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: '>=3.2.6'
         version: 3.2.6(@types/debug@4.1.13)(@types/node@26.0.1)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.7.0)(yaml@2.8.3)
 
   packages/core:

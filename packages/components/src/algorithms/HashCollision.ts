@@ -33,7 +33,6 @@ export class HashCollision {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Hash table — chaining",
       variant: "toolbar",

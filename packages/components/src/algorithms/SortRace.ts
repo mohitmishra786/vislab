@@ -49,7 +49,6 @@ export class SortRace {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Sort race — bubble vs insertion vs quick",
       variant: "toolbar",

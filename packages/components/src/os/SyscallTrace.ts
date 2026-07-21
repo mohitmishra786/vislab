@@ -33,7 +33,6 @@ export class SyscallTrace {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Syscall trace — user → kernel",
       variant: "terminal",

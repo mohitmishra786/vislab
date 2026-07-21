@@ -34,7 +34,6 @@ export class BTreeOps {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "B-tree search",
       variant: "diagram",

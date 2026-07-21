@@ -57,7 +57,6 @@ export class GraphTraversal {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: `Graph — ${this.algorithm.toUpperCase()} traversal`,
       variant: "diagram",

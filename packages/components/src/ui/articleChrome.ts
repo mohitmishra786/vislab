@@ -70,7 +70,14 @@ export function createArticleChrome(
   const t = resolveTheme(options.themeName ?? "dark-premium");
   const variant = options.variant ?? "article";
   const reducedMotion = prefersReducedMotion();
-  const uid = `vislab-${(options.testId ?? "widget").replace(/\s+/g, "-")}-${Math.random().toString(36).slice(2, 8)}`;
+  // Non-security DOM ids only — prefer crypto when available (CodeQL: insecure randomness)
+  const rand =
+    typeof crypto !== "undefined" && "getRandomValues" in crypto
+      ? Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) =>
+          b.toString(16).padStart(2, "0"),
+        ).join("")
+      : `${Date.now().toString(36)}${performance.now().toString(36).replace(".", "")}`;
+  const uid = `vislab-${(options.testId ?? "widget").replace(/\s+/g, "-")}-${rand}`;
   const titleId = `${uid}-title`;
   const summaryId = `${uid}-summary`;
 

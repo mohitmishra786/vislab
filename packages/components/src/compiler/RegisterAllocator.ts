@@ -34,7 +34,6 @@ export class RegisterAllocator {
       canvasMount,
       theme: t,
       reducedMotion,
-      setSummary,
     } = createArticleChrome({
       title: "Register allocation",
       variant: "toolbar",
