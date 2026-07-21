@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export type GraphTraversalOptions = {
@@ -57,6 +58,7 @@ export class GraphTraversal {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: `Graph — ${this.algorithm.toUpperCase()} traversal`,
       variant: "diagram",
@@ -77,15 +79,17 @@ export class GraphTraversal {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      `${this.algorithm.toUpperCase()} graph traversal. Step visits nodes in order; toggle BFS/DFS to restart.`,
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
-      title: "VisLab widget",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "VisLab widget",
+      title: `Graph — ${this.algorithm.toUpperCase()} traversal`,
+      summary: liveSummary,
     });
 
     for (const [id, p] of Object.entries(POSITIONS)) {
@@ -134,6 +138,9 @@ export class GraphTraversal {
         n.fillColor = t.accent2;
         visited.push(id);
         this.orderLabel.text = `Order: ${visited.join(" → ")}`;
+        this.runtime?.summary.set(
+          `${this.algorithm.toUpperCase()} traversal: visited ${visited.join(" → ")} (${visited.length}/${visitOrder.length}).`,
+        );
       }
     });
 
@@ -144,6 +151,9 @@ export class GraphTraversal {
       visited.length = 0;
       for (const n of this.nodes.values()) n.fillColor = t.surface;
       this.orderLabel.text = `Switched to ${this.algorithm.toUpperCase()} — press Step`;
+      this.runtime?.summary.set(
+        `Switched to ${this.algorithm.toUpperCase()} traversal. Press Step to visit nodes in order.`,
+      );
     });
 
     this.scene.start();

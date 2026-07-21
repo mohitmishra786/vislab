@@ -15,7 +15,10 @@ _"Complexity is the enemy of understanding."_
 </div>
 
 <p align="center">
-  <img src="docs/media/storage-comparison.png" alt="Storage latency race widget" width="720" />
+  <img src="docs/media/storage-comparison.gif" alt="Animated storage latency race across L1, NVMe, SSD, and HDD" width="720" />
+</p>
+<p align="center">
+  <img src="docs/media/storage-comparison.png" alt="Storage latency race widget still" width="720" />
 </p>
 <p align="center">
   <img src="docs/media/cpu-pipeline.png" alt="CPU pipeline widget with SimClock controls" width="720" />
@@ -39,7 +42,7 @@ Aesthetic: flat geometry, monospace (JetBrains Mono), no gradients — inspired 
 | ---- | ----- |
 | npm `@vislab/*` | **Not published yet** — use monorepo install |
 | GitHub Releases | Pending first `0.1.0` |
-| Bundle gzip | VisLab ≈ **20.5 KB** · Embeds ≈ **23 KB** (CI budgeted; SimClock+export chrome) |
+| Bundle gzip | VisLab ≈ **22 KB** · Embeds ≈ **28 KB** (CI budgeted; per-widget ESM graphs ≤36 KB) |
 | Support | **Tier 1:** React + static HTML · **Tier 2:** Jekyll · **Tier 3:** Puppeteer exporter |
 
 ## Packages
@@ -53,7 +56,7 @@ Aesthetic: flat geometry, monospace (JetBrains Mono), no gradients — inspired 
 | **@vislab/web-components** | `0.0.0` | Custom elements, `[data-vislab]`, IIFE `VisLabEmbeds` |
 | **@vislab/cli** | `0.2.0` | `vislab build`, `widget`, `preview`, `new` |
 | **@vislab/exporter** | `0.0.0` | Optional Puppeteer frame capture (not needed for embeds) |
-| **vislab-jekyll** | `0.1.0` | Jekyll layout + includes |
+| **vislab-jekyll** | `0.1.0` | Jekyll layout + includes (**not on RubyGems yet** — path gem locally) |
 
 ## Quick start (monorepo)
 

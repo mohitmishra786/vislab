@@ -47,6 +47,11 @@ PLANS.md
 !apps/demo-blog/e2e/visual.spec.ts-snapshots/*.png
 !docs/media/*.png
 !apps/docs/public/*.png
+*.gif
+!docs/media/*.gif
+*.webm
+!docs/media/*.webm
 .gemini/
 brain/
 scratch/
+docs/media/.gif-meta.json

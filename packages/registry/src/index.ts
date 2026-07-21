@@ -14,8 +14,11 @@ export {
   getVislabEntryByGlobalName,
   getVislabEntryById,
   createVislabComponent,
+  createVislabComponentAsync,
   registerVislabWidget,
   renderVislabMountError,
 } from "./registry";
 
 export { mountDataVislabRoots, autoMountVislabOnDomReady } from "./mount";
+
+export { widgetLoaders, loadWidgetClass } from "./loaders";

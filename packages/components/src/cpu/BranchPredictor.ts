@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class BranchPredictor {
@@ -35,6 +36,7 @@ export class BranchPredictor {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "2-bit saturating branch predictor",
       variant: "diagram",
@@ -55,15 +57,18 @@ export class BranchPredictor {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "2-bit saturating counter branch predictor. Branch taken / Not taken steps the state machine between Strongly NT and Strongly T.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "2-bit saturating branch predictor",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "2-bit saturating branch predictor",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     this.stateLabel = new Label("state-lbl", "Prediction: Not Taken", 280, 24);
@@ -98,12 +103,17 @@ export class BranchPredictor {
 
   private updateHighlight() {
     const t = this.theme;
+    const states = ["Strongly NT", "Weakly NT", "Weakly T", "Strongly T"];
     for (let i = 0; i < 4; i++) {
       this.stateMachine[i].fillColor =
         i === this.counter ? t.accent1 : "transparent";
     }
-    this.stateLabel.text =
+    const prediction =
       this.counter >= 2 ? "Prediction: Taken" : "Prediction: Not Taken";
+    this.stateLabel.text = prediction;
+    this.runtime?.summary.set(
+      `2-bit branch predictor: state ${states[this.counter]} (${this.counter}/3). ${prediction}.`,
+    );
   }
 
   public destroy() {

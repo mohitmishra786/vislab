@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export type SortRaceOptions = {
@@ -49,6 +50,7 @@ export class SortRace {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Sort race — bubble vs insertion vs quick",
       variant: "toolbar",
@@ -69,15 +71,17 @@ export class SortRace {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Bubble vs insertion vs quicksort race on the same shuffled array. Start race to compare step counts and progress.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Sort race — bubble vs insertion vs quick",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Sort race — bubble vs insertion vs quick",
+      summary: liveSummary,
     });
 
     const data =
@@ -93,6 +97,9 @@ export class SortRace {
     startBtn.addEventListener("click", () => {
       if (this.isSorting) return;
       this.isSorting = true;
+      this.runtime?.summary.set(
+        `Sort race running on ${this.arraySize} elements: bubble vs insertion vs quicksort.`,
+      );
       this.runBubbleSort(bubbleArr);
       this.runInsertionSort(insertArr);
       this.runQuickSort(quickArr);

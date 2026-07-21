@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class CFGBuilder {
@@ -32,6 +33,7 @@ export class CFGBuilder {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Control-flow graph",
       variant: "diagram",
@@ -51,15 +53,18 @@ export class CFGBuilder {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Control-flow graph of basic blocks. Trace path highlights a sample execution path.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Control-flow graph",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Control-flow graph",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     const defs = [
@@ -97,6 +102,9 @@ export class CFGBuilder {
       const idx = path[this.step++];
       this.blocks[idx].fillColor = t.accent2;
       this.status.text = `Executing ${this.blocks[idx].label}`;
+      this.runtime?.summary.set(
+        `CFG path step ${this.step}/${path.length}: executing ${this.blocks[idx].label}.`,
+      );
     });
 
     this.scene.start();

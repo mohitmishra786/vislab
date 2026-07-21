@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class HashCollision {
@@ -33,6 +34,7 @@ export class HashCollision {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Hash table — chaining",
       variant: "toolbar",
@@ -52,15 +54,18 @@ export class HashCollision {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Hash table with chaining. Insert next places keys into buckets and shows collisions.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Hash table — chaining",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Hash table — chaining",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     for (let i = 0; i < 8; i++) {
@@ -92,6 +97,9 @@ export class HashCollision {
   private insertNext() {
     if (this.keyIdx >= this.keys.length) {
       this.status.text = "All keys inserted";
+      this.runtime?.summary.set(
+        "Hash table full demo: all sample keys inserted into chained buckets.",
+      );
       return;
     }
     const key = this.keys[this.keyIdx++];
@@ -105,7 +113,11 @@ export class HashCollision {
     this.scene.addEntity(item);
     item.moveTo(chainX, this.buckets[bucket].y, 0.12);
     this.buckets[bucket].fillColor = this.theme.accent3;
+    const collision = this.keyIdx > 2 ? " (collision — chain grows)" : "";
     this.status.text = `"${key}" → bucket [${bucket}]${this.keyIdx > 2 ? " (collision)" : ""}`;
+    this.runtime?.summary.set(
+      `Hash insert: "${key}" → bucket [${bucket}]${collision}. Keys placed: ${this.keyIdx}/${this.keys.length}.`,
+    );
     this.scene.scheduler.schedule({
       id: `clr-b-${bucket}`,
       triggerTime: this.scene.clock.simTime + 400,

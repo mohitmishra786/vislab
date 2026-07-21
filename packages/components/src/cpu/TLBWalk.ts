@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class TLBWalk {
@@ -37,6 +38,7 @@ export class TLBWalk {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "TLB / page walk",
       variant: "toolbar",
@@ -57,15 +59,18 @@ export class TLBWalk {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "TLB hit vs page-table walk. Simulate hit for the fast path (~1ns) or miss to walk multi-level page tables.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "TLB / page walk",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "TLB / page walk",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     this.tlb = new AnimatedRect("tlb", 40, 120, 100, 70);
@@ -124,6 +129,9 @@ export class TLBWalk {
     const total = this.hits + this.misses;
     const rate = total ? ((this.hits / total) * 100).toFixed(0) : "—";
     this.status.text = `${msg} · hit ${rate}% (${this.hits}H/${this.misses}M)`;
+    this.runtime?.summary.set(
+      `TLB / page walk: ${msg}. Hit rate ${rate}% (${this.hits} hits, ${this.misses} misses).`,
+    );
   }
 
   private simulateHit() {

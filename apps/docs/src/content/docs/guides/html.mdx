@@ -1,12 +1,44 @@
 ---
 title: Plain HTML integration
+description: Eager IIFE embeds and optional lazy ESM code-splitting for single-widget pages
 ---
 
+## Eager embed (recommended for static sites)
+
+Copy the full catalog IIFE with the CLI (from a built monorepo, or after npm publish):
+
 ```bash
-vislab build -o ./public/vislab
+pnpm --filter @vislab/cli exec vislab build -o ./public/vislab
 ```
 
 ```html
 <script src="/vislab/vislab-embed.min.js" defer></script>
 <div data-vislab="StorageComparison" style="min-height:420px"></div>
 ```
+
+`initVislabEmbeds()` runs on load and mounts every `[data-vislab]` root.
+
+## Lazy ESM (single-widget pages)
+
+When you only need one simulation and use a modern bundler / import maps, load a per-widget chunk instead of the full catalog:
+
+```ts
+import { createVislabComponentAsync } from "@vislab/registry";
+
+const el = document.querySelector("#sim")!;
+await createVislabComponentAsync("CpuPipeline", el, {
+  stages: ["IF", "ID", "EX", "MEM", "WB"],
+});
+```
+
+Or mark embeds for lazy mount:
+
+```html
+<div data-vislab="CacheSimulator" data-vislab-lazy="true"></div>
+<script type="module">
+  import { initVislabEmbedsLazy } from "@vislab/web-components";
+  initVislabEmbedsLazy();
+</script>
+```
+
+Widget modules are also exported as `@vislab/components/widgets/<GlobalName>` (for example `CpuPipeline`). Core (`@vislab/core`) stays external for tree-shaking.

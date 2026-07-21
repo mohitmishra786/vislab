@@ -16,7 +16,9 @@ Chrome buttons use `styleVislabButton` with `role="button"` and `aria-label` fro
 
 ## Versioning and publish
 
-Packages are published as `@vislab/*` on npm; the Jekyll theme is released as the `vislab-jekyll` gem. Use semantic versioning and changelog entries when cutting releases.
+**Status:** `@vislab/*` packages are **not yet published** to npm (first `0.1.0` needs human approval + `NPM_TOKEN`). The Jekyll theme gemspec lives in `packages/jekyll-theme` but is **not published** to RubyGems until marketed as installable.
+
+Until publish, develop against the monorepo workspace. Use semantic versioning and changelog entries when cutting releases.
 
 ## CLI
 
@@ -46,14 +48,34 @@ bash scripts/update-visual-snapshots-linux.sh
 
 Commit **both** darwin and linux PNGs with your widget PR.
 
+## Widget runtime (SimClock + Static export)
+
+All widgets should use `attachWidgetRuntime` + `createLiveSummary` from `packages/components/src/ui/widgetRuntime.ts` after `new Scene(canvas)` so pause/speed controls, reduced-motion defaults, live SR summaries, and SVG a11y export stay consistent.
+
+- Call `liveSummary.set(...)` (or `runtime.summary.set`) when simulation state changes so screen readers and Static SVG export stay current.
+- Set `showStaticExport: false` for pure step-through widgets where the export control clutters the toolbar.
+
+## Per-widget code-splitting (#51)
+
+`@vislab/components` builds multi-entry ESM at `@vislab/components/widgets/<Name>` plus a full IIFE catalog (`index.global.js`).
+
+- **Eager (default IIFE / `initVislabEmbeds()`):** one script loads the full catalog — best for static HTML / Jekyll.
+- **Lazy ESM:** `createVislabComponentAsync` / `initVislabEmbedsLazy()` dynamically import only the requested widget graph.
+
+```ts
+import { createVislabComponentAsync } from "@vislab/registry";
+await createVislabComponentAsync("CpuPipeline", el, {
+  stages: ["IF", "ID", "EX", "MEM", "WB"],
+});
+```
+
+Bundle budgets: `pnpm run check:bundle-size` (full IIFE + per-widget ESM graph gzip).
+
 ## Docs & media helpers
 
 ```bash
 pnpm run docs:widgets    # regenerate component MDX from registry (preserves hand-flagship pages)
 pnpm run sri             # write docs/SRI.md integrity hashes after build
 pnpm run media:capture   # README/OG stills into docs/media/ (needs demo-blog build + chromium)
+pnpm run media:gif       # 4s StorageComparison GIF/WebM (needs demo-blog build + chromium + ffmpeg)
 ```
-
-## Widget runtime (SimClock + Static export)
-
-All widgets should use `attachWidgetRuntime` from `packages/components/src/ui/widgetRuntime.ts` after `new Scene(canvas)` so pause/speed controls, reduced-motion defaults, and SVG a11y export stay consistent.

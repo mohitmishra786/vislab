@@ -5,6 +5,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 import { detectDataHazard } from "./pipelineHazards";
 
@@ -72,12 +73,17 @@ export class CpuPipeline {
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
     const wantAuto = options?.autoPlay !== false && !reducedMotion;
+    const liveSummary = createLiveSummary(
+      setSummary,
+      `CPU pipeline: stages ${this.stages.join(" → ")}. Pause/Play and speed control animation; Step advances one cycle.`,
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "CPU pipeline",
+      summary: liveSummary,
       startPaused: !wantAuto,
       onPauseChange: (paused) => {
         this.running = !paused;
@@ -86,9 +92,6 @@ export class CpuPipeline {
           this.scheduleAdvance();
         }
       },
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "CPU pipeline",
     });
 
     const stageWidth = 64;
@@ -144,6 +147,9 @@ export class CpuPipeline {
       this.running = false;
       this.runtime?.clock.refresh();
       this.advancePipeline();
+      this.runtime?.summary.set(
+        `CPU pipeline stepped. Active instructions: ${this.instructions.length}. Stages: ${this.stages.join(" → ")}.`,
+      );
     });
 
     this.scene.start();
@@ -153,8 +159,8 @@ export class CpuPipeline {
       this.scheduleFetch();
       this.scheduleAdvance();
     }
-    setSummary(
-      `CPU pipeline visualization with stages ${this.stages.join(", ")}. Use Pause/Play and speed controls; Step advances one cycle.`,
+    liveSummary.set(
+      `CPU pipeline: stages ${this.stages.join(" → ")}. Use Pause/Play and speed controls; Step advances one cycle.`,
     );
   }
 

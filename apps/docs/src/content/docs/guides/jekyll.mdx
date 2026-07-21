@@ -1,12 +1,23 @@
 ---
 title: Jekyll integration
+description: Embed VisLab widgets in Jekyll sites (local gem until RubyGems publish)
 ---
 
+## Status
+
+The `vislab-jekyll` gemspec lives in this monorepo under `packages/jekyll-theme`. **It is not published to RubyGems yet.** Path the gem locally (or vendor the layout/includes) until a public gem release is cut.
+
 ```ruby
-# Gemfile
-gem "vislab-jekyll"
+# Gemfile — monorepo / local path until RubyGems publish
+gem "vislab-jekyll", path: "path/to/vislab/packages/jekyll-theme"
 ```
+
+After a public gem release, `gem "vislab-jekyll"` without `path:` will work.
+
+## Include
 
 ```liquid
 {% include vislab.html id="cpu1" component="CpuPipeline" %}
 ```
+
+Serve the built IIFE (`vislab-embed.min.js`) from your site assets (see [HTML guide](/guides/html/)).

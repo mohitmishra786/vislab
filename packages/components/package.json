@@ -20,13 +20,19 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    }
+    },
+    "./widgets/*": {
+      "types": "./dist/widgets/*.d.ts",
+      "import": "./dist/widgets/*.mjs",
+      "require": "./dist/widgets/*.js"
+    },
+    "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "sideEffects": ["./dist/chunk-*.js", "./dist/chunk-*.mjs"],
   "files": ["dist"],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm,iife --global-name VisLab --dts",
-    "dev": "tsup src/index.ts --format cjs,esm,iife --global-name VisLab --dts --watch",
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --config tsup.config.ts --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

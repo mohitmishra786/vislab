@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class BTreeOps {
@@ -34,6 +35,7 @@ export class BTreeOps {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "B-tree search",
       variant: "diagram",
@@ -53,15 +55,18 @@ export class BTreeOps {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "B-tree search visualization. Search step walks keys from root toward leaves.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "B-tree search",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "B-tree search",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     this.root = new AnimatedRect("r", 280, 40, 110, 40);
@@ -105,6 +110,9 @@ export class BTreeOps {
     if (key >= 40 && key < 80) target = this.children[1];
     if (key >= 80) target = this.children[2];
     this.status.text = `Search ${key}: root → ${target.label}`;
+    this.runtime?.summary.set(
+      `B-tree search for key ${key}: descend root → ${target.label}.`,
+    );
     this.scene.scheduler.schedule({
       id: `bt-${key}`,
       triggerTime: this.scene.clock.simTime + 400,

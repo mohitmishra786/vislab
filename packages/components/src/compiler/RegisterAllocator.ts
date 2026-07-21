@@ -7,6 +7,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export class RegisterAllocator {
@@ -34,6 +35,7 @@ export class RegisterAllocator {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Register allocation",
       variant: "toolbar",
@@ -53,15 +55,18 @@ export class RegisterAllocator {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Register allocation with spill. Allocate assigns variables to registers until capacity, then spills.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Register allocation",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Register allocation",
+      summary: liveSummary,
+      showStaticExport: false,
     });
 
     for (let i = 0; i < 4; i++) {
@@ -91,7 +96,12 @@ export class RegisterAllocator {
   }
 
   private allocate() {
-    if (this.varIdx >= this.vars.length) return;
+    if (this.varIdx >= this.vars.length) {
+      this.runtime?.summary.set(
+        "Register allocation complete: all variables assigned or spilled.",
+      );
+      return;
+    }
     const v = this.vars[this.varIdx++];
     const t = this.theme;
     if (this.varIdx <= 4) {
@@ -99,9 +109,15 @@ export class RegisterAllocator {
       reg.fillColor = t.accent1;
       reg.label = `R${this.varIdx - 1}=${v}`;
       this.status.text = `Assigned ${v} → R${this.varIdx - 1}`;
+      this.runtime?.summary.set(
+        `Register allocation: assigned ${v} → R${this.varIdx - 1} (${this.varIdx}/${this.vars.length}).`,
+      );
     } else {
       this.spill.fillColor = t.accent3;
       this.status.text = `Spill ${v} to stack (registers full)`;
+      this.runtime?.summary.set(
+        `Register allocation: spill ${v} to stack — physical registers full.`,
+      );
       this.scene.scheduler.schedule({
         id: "spill-clr",
         triggerTime: this.scene.clock.simTime + 500,

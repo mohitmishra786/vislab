@@ -6,6 +6,7 @@ import {
   type WidgetRuntime,
   attachWidgetRuntime,
   createClockHost,
+  createLiveSummary,
 } from "../ui/widgetRuntime";
 
 export type VirtualMemoryOptions = {
@@ -43,6 +44,7 @@ export class VirtualMemory {
       canvasMount,
       theme: t,
       reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "Virtual memory — page table walk",
       variant: "terminal",
@@ -63,15 +65,17 @@ export class VirtualMemory {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const liveSummary = createLiveSummary(
+      setSummary,
+      "Virtual-to-physical page mapping. Page walk animates a translation; Page fault marks an unmapped page.",
+    );
     this.runtime = attachWidgetRuntime(this.scene, t, {
       wrapper,
       clockHost,
       reducedMotion,
       canvas,
       title: "Virtual memory — page table walk",
-      getSummary: () =>
-        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
-        "Virtual memory — page table walk",
+      summary: liveSummary,
     });
 
     const ptLabel = new Label("pt", "Page Table", 280, 28);
@@ -129,6 +133,9 @@ export class VirtualMemory {
     this.pointer.moveTo(36, v.y, 0.15);
     v.fillColor = t.accent1;
     this.status.text = `Walking v${idx} → PTE → frame ${idx}`;
+    this.runtime?.summary.set(
+      `Virtual memory: walking virtual page v${idx} through the page table to physical frame ${idx}.`,
+    );
 
     this.scene.scheduler.schedule({
       id: `map-${idx}`,
@@ -164,6 +171,9 @@ export class VirtualMemory {
     const v = this.vPages[idx];
     v.fillColor = t.accent3;
     this.status.text = `Page fault on v${idx} — swap in from disk`;
+    this.runtime?.summary.set(
+      `Virtual memory: page fault on v${idx} — OS will swap the page in from disk and update the PTE.`,
+    );
     this.scene.scheduler.schedule({
       id: "fault-swap",
       triggerTime: this.scene.clock.simTime + 800,
