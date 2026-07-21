@@ -28,7 +28,8 @@ jobs:
         run: pnpm run build
       - name: Bundle size budget
         run: pnpm run check:bundle-size
-      - name: Install Playwright (Chromium + WebKit)
-        run: pnpm --filter demo-blog exec playwright install chromium webkit
+      - name: Install Playwright browsers + OS deps
+        # --with-deps installs WebKit/Chromium system libraries on Ubuntu runners
+        run: pnpm --filter demo-blog exec playwright install --with-deps chromium webkit
       - name: E2E smoke + mobile + visual (demo-blog)
         run: pnpm --filter demo-blog test:e2e
