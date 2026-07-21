@@ -1,7 +1,8 @@
 {
   "name": "@vislab/registry",
   "version": "0.0.0",
-  "private": true,
+  "description": "Single widget registry (metadata, props schema, create) for all VisLab adapters",
+  "keywords": ["vislab", "registry", "widgets", "systems-visualization"],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -12,6 +13,7 @@
       "require": "./dist/index.js"
     }
   },
+  "sideEffects": false,
   "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
@@ -27,5 +29,14 @@
     "typescript": "^5.0.0",
     "vitest": "^3.2.6",
     "happy-dom": "^20.8.9"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitmishra786/vislab.git",
+    "directory": "packages/registry"
+  },
+  "license": "MIT"
 }

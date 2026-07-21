@@ -2,8 +2,14 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
+import { type CachePolicy, pickVictimIndex, touchOnHit } from "./cachePolicy";
 
-export type CachePolicy = "lru" | "fifo";
+export type { CachePolicy } from "./cachePolicy";
 
 export type CacheSimulatorOptions = {
   themeName?: string;
@@ -14,11 +20,15 @@ export type CacheSimulatorOptions = {
 type CacheLine = {
   rect: AnimatedRect;
   tag: string | null;
+  /** Set when line is filled — FIFO order. */
+  insertedAt: number;
+  /** Recency for LRU (and set on fill). */
   lastUsed: number;
 };
 
 export class CacheSimulator {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private l1: CacheLine[] = [];
   private l2: CacheLine[] = [];
@@ -44,17 +54,20 @@ export class CacheSimulator {
     policyBtn.type = "button";
     policyBtn.textContent = `Policy: ${this.policy.toUpperCase()}`;
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Cache hierarchy",
       variant: "toolbar",
       canvasHeight: "400px",
       testId: "cache-simulator",
       themeName: options?.themeName,
-      headerActions: [policyBtn, requestBtn],
+      headerActions: [policyBtn, requestBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(requestBtn, t, "primary");
@@ -70,6 +83,16 @@ export class CacheSimulator {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Cache hierarchy",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Cache hierarchy",
+    });
 
     this.layoutArchitecture();
     this.statsLabel = new Label("stats", "Hit rate: —", 12, 380);
@@ -99,7 +122,7 @@ export class CacheSimulator {
       rect.strokeColor = t.accent2;
       rect.labelFontPx = 10;
       rect.labelColor = t.fg;
-      const line: CacheLine = { rect, tag: null, lastUsed: 0 };
+      const line: CacheLine = { rect, tag: null, insertedAt: 0, lastUsed: 0 };
       this.l1.push(line);
       this.scene.addEntity(rect);
     }
@@ -110,7 +133,7 @@ export class CacheSimulator {
       rect.strokeColor = t.accent1;
       rect.labelFontPx = 10;
       rect.labelColor = t.fg;
-      const line: CacheLine = { rect, tag: null, lastUsed: 0 };
+      const line: CacheLine = { rect, tag: null, insertedAt: 0, lastUsed: 0 };
       this.l2.push(line);
       this.scene.addEntity(rect);
     }
@@ -121,7 +144,7 @@ export class CacheSimulator {
       rect.strokeColor = t.accent4;
       rect.labelFontPx = 10;
       rect.labelColor = t.fg;
-      const line: CacheLine = { rect, tag: null, lastUsed: 0 };
+      const line: CacheLine = { rect, tag: null, insertedAt: 0, lastUsed: 0 };
       this.l3.push(line);
       this.scene.addEntity(rect);
     }
@@ -154,10 +177,14 @@ export class CacheSimulator {
   }
 
   private pickVictim(lines: CacheLine[]): CacheLine {
-    if (this.policy === "fifo") {
-      return lines.reduce((a, b) => (a.lastUsed < b.lastUsed ? a : b));
-    }
-    return lines.reduce((a, b) => (a.lastUsed < b.lastUsed ? a : b));
+    const idx = pickVictimIndex(lines, this.policy);
+    return lines[idx];
+  }
+
+  private fillLine(line: CacheLine, tag: string, counter: number) {
+    line.tag = tag;
+    line.insertedAt = counter;
+    line.lastUsed = counter;
   }
 
   private updateStats() {
@@ -174,7 +201,9 @@ export class CacheSimulator {
     const l1Hit = this.l1.find((l) => l.tag === tag);
     if (l1Hit) {
       this.hits++;
-      l1Hit.lastUsed = this.accessCounter;
+      if (touchOnHit(this.policy)) {
+        l1Hit.lastUsed = this.accessCounter;
+      }
       l1Hit.rect.label = `L1 ${tag}`;
       this.flash(l1Hit.rect, t.accent2);
       this.updateStats();
@@ -184,11 +213,12 @@ export class CacheSimulator {
     this.misses++;
     const l2Hit = this.l2.find((l) => l.tag === tag);
     if (l2Hit) {
-      l2Hit.lastUsed = this.accessCounter;
+      if (touchOnHit(this.policy)) {
+        l2Hit.lastUsed = this.accessCounter;
+      }
       this.flash(l2Hit.rect, t.accent3, 400);
       const victim = this.pickVictim(this.l1);
-      victim.tag = tag;
-      victim.lastUsed = this.accessCounter;
+      this.fillLine(victim, tag, this.accessCounter);
       victim.rect.label = `L1 ${tag}`;
       this.updateStats();
       return;
@@ -196,15 +226,15 @@ export class CacheSimulator {
 
     const l3Hit = this.l3.find((l) => l.tag === tag);
     if (l3Hit) {
-      l3Hit.lastUsed = this.accessCounter;
+      if (touchOnHit(this.policy)) {
+        l3Hit.lastUsed = this.accessCounter;
+      }
       this.flash(l3Hit.rect, t.accent3, 400);
       const l2Victim = this.pickVictim(this.l2);
-      l2Victim.tag = tag;
-      l2Victim.lastUsed = this.accessCounter;
+      this.fillLine(l2Victim, tag, this.accessCounter);
       l2Victim.rect.label = `L2 ${tag}`;
       const l1Victim = this.pickVictim(this.l1);
-      l1Victim.tag = tag;
-      l1Victim.lastUsed = this.accessCounter;
+      this.fillLine(l1Victim, tag, this.accessCounter);
       l1Victim.rect.label = `L1 ${tag}`;
       this.updateStats();
       return;
@@ -217,16 +247,13 @@ export class CacheSimulator {
       execute: () => {
         this.memoryBlocks[addressIndex].fillColor = "transparent";
         const l3Victim = this.pickVictim(this.l3);
-        l3Victim.tag = tag;
-        l3Victim.lastUsed = this.accessCounter;
+        this.fillLine(l3Victim, tag, this.accessCounter);
         l3Victim.rect.label = `L3 ${tag}`;
         const l2Victim = this.pickVictim(this.l2);
-        l2Victim.tag = tag;
-        l2Victim.lastUsed = this.accessCounter;
+        this.fillLine(l2Victim, tag, this.accessCounter);
         l2Victim.rect.label = `L2 ${tag}`;
         const l1Victim = this.pickVictim(this.l1);
-        l1Victim.tag = tag;
-        l1Victim.lastUsed = this.accessCounter;
+        this.fillLine(l1Victim, tag, this.accessCounter);
         l1Victim.rect.label = `L1 ${tag}`;
         this.updateStats();
       },
@@ -235,6 +262,7 @@ export class CacheSimulator {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -29,11 +29,12 @@ import type { VislabComponentEntry, VislabWidget } from "./types";
 export const vislabRegistry: VislabComponentEntry[] = [
   {
     id: "storage-comparison",
+    maturity: "flagship",
     globalName: "StorageComparison",
-    displayName: "Storage I/O latency",
+    displayName: "Storage latency race",
     category: "storage",
     description:
-      "Relative latency comparison across storage tiers (Ben Dicken–style).",
+      "Relative latency race across L1, NVMe, SSD, and HDD storage tiers.",
     customElementTag: "vislab-storage-comparison",
     props: [
       THEME_PROP,
@@ -52,6 +53,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cpu-pipeline",
+    maturity: "flagship",
     globalName: "CpuPipeline",
     displayName: "CPU pipeline",
     category: "cpu",
@@ -81,6 +83,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cache-simulator",
+    maturity: "flagship",
     globalName: "CacheSimulator",
     displayName: "Cache hierarchy",
     category: "cpu",
@@ -110,6 +113,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "branch-predictor",
+    maturity: "beta",
     globalName: "BranchPredictor",
     displayName: "Branch predictor",
     category: "cpu",
@@ -120,6 +124,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "tlb-walk",
+    maturity: "beta",
     globalName: "TLBWalk",
     displayName: "TLB / page walk",
     category: "cpu",
@@ -130,6 +135,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "process-scheduler",
+    maturity: "flagship",
     globalName: "ProcessScheduler",
     displayName: "Process scheduler",
     category: "os",
@@ -168,6 +174,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "virtual-memory",
+    maturity: "beta",
     globalName: "VirtualMemory",
     displayName: "Virtual memory",
     category: "os",
@@ -189,6 +196,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "syscall-trace",
+    maturity: "beta",
     globalName: "SyscallTrace",
     displayName: "Syscall trace",
     category: "os",
@@ -199,6 +207,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "inode-tree",
+    maturity: "beta",
     globalName: "InodeTree",
     displayName: "Inode tree",
     category: "os",
@@ -209,6 +218,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "sort-race",
+    maturity: "flagship",
     globalName: "SortRace",
     displayName: "Sorting race",
     category: "algorithms",
@@ -237,6 +247,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "btree-ops",
+    maturity: "beta",
     globalName: "BTreeOps",
     displayName: "B-tree ops",
     category: "algorithms",
@@ -247,6 +258,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "graph-traversal",
+    maturity: "beta",
     globalName: "GraphTraversal",
     displayName: "Graph traversal",
     category: "algorithms",
@@ -268,6 +280,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "hash-collision",
+    maturity: "beta",
     globalName: "HashCollision",
     displayName: "Hash collisions",
     category: "algorithms",
@@ -278,6 +291,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "lexer",
+    maturity: "beta",
     globalName: "Lexer",
     displayName: "Lexer",
     category: "compiler",
@@ -299,6 +313,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "parser",
+    maturity: "beta",
     globalName: "Parser",
     displayName: "Parser",
     category: "compiler",
@@ -309,6 +324,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "cfg-builder",
+    maturity: "beta",
     globalName: "CFGBuilder",
     displayName: "CFG builder",
     category: "compiler",
@@ -319,6 +335,7 @@ export const vislabRegistry: VislabComponentEntry[] = [
   },
   {
     id: "register-allocator",
+    maturity: "beta",
     globalName: "RegisterAllocator",
     displayName: "Register allocation",
     category: "compiler",
@@ -364,6 +381,29 @@ export function registerVislabWidget(entry: VislabComponentEntry): void {
   byId.set(entry.id, entry);
 }
 
+/**
+ * Render a visible error into a host element when a widget fails to mount.
+ * Used by React/data-vislab adapters so authors do not see a blank div.
+ */
+export function renderVislabMountError(
+  container: HTMLElement,
+  message: string,
+): void {
+  container.replaceChildren();
+  const box = document.createElement("div");
+  box.setAttribute("role", "alert");
+  box.setAttribute("data-vislab-error", "true");
+  box.style.fontFamily = '"JetBrains Mono", "Courier New", monospace';
+  box.style.fontSize = "13px";
+  box.style.padding = "16px";
+  box.style.border = "1px solid #ef4444";
+  box.style.background = "#1a0a0a";
+  box.style.color = "#fecaca";
+  box.style.borderRadius = "6px";
+  box.textContent = message;
+  container.appendChild(box);
+}
+
 export function createVislabComponent(
   globalName: string,
   container: HTMLElement,
@@ -371,7 +411,10 @@ export function createVislabComponent(
 ): VislabWidget {
   const entry = getVislabEntryByGlobalName(globalName);
   if (!entry) {
-    throw new Error(`Unknown VisLab component: ${globalName}`);
+    const known = vislabRegistry.map((e) => e.globalName).join(", ");
+    const message = `Unknown VisLab component: "${globalName}". Known: ${known}`;
+    renderVislabMountError(container, message);
+    throw new Error(message);
   }
   return entry.create(container, props);
 }

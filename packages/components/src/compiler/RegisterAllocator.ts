@@ -3,9 +3,15 @@ import { AnimatedRect, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class RegisterAllocator {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private regs: AnimatedRect[] = [];
@@ -21,17 +27,20 @@ export class RegisterAllocator {
     allocBtn.type = "button";
     allocBtn.textContent = "Allocate var";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Register allocation",
       variant: "toolbar",
       canvasHeight: "200px",
       testId: "register-allocator",
       themeName: options?.themeName,
-      headerActions: allocBtn,
+      headerActions: [allocBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(allocBtn, t, "primary");
@@ -44,6 +53,16 @@ export class RegisterAllocator {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Register allocation",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Register allocation",
+    });
 
     for (let i = 0; i < 4; i++) {
       const rect = new AnimatedRect(`r${i}`, 50 + i * 100, 70, 80, 40);
@@ -94,6 +113,7 @@ export class RegisterAllocator {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

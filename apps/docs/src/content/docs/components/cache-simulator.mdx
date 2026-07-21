@@ -1,9 +1,50 @@
 ---
 title: Cache hierarchy
+description: L1/L2/L3 hits, misses, and LRU vs FIFO replacement
 ---
 
 import { CacheSimulator } from "@vislab/react";
 
-L1/L2/L3 hits, misses, and LRU/FIFO eviction.
+Visualize hierarchical cache lookups with **LRU** or **FIFO** replacement. Hit rate stats update as you issue random accesses.
 
-<CacheSimulator client:visible />
+## Live demo
+
+<figure>
+  <CacheSimulator client:visible />
+  <figcaption>
+    Cache hierarchy demo. Toggle LRU/FIFO and issue random memory accesses.
+  </figcaption>
+</figure>
+
+## When to use
+
+Cache locality, miss penalties, and replacement policy discussions.
+
+## Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `policy` | `"lru" \| "fifo"` | `lru` | Replacement policy |
+| `lineCount` | `number` | `8` | Memory lines shown (4–16) |
+| `themeName` | `string` | `dark-premium` | Theme id |
+
+## Snippets
+
+```astro
+---
+import { CacheSimulator } from "@vislab/react";
+---
+<CacheSimulator client:visible policy="fifo" lineCount={8} />
+```
+
+```html
+<div data-vislab="CacheSimulator" data-props='{"policy":"lru"}' style="min-height:400px"></div>
+```
+
+## Pedagogy notes
+
+Associativity, inclusivity, and multi-core coherence are **not** modeled. FIFO does not bump recency on hits; LRU does.
+
+## Accessibility
+
+Provide a figcaption describing hit/miss behavior. Prefer horizontal scroll on narrow viewports (min width ~320px).

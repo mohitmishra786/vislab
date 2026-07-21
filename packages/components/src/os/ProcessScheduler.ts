@@ -2,8 +2,15 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Label, QueueViz, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
-export type SchedulerAlgorithm = "round-robin" | "cfs";
+import { type SchedulerAlgorithm, normalizeQuantum } from "./schedulerPolicy";
+
+export type { SchedulerAlgorithm } from "./schedulerPolicy";
 
 export type ProcessSchedulerOptions = {
   themeName?: string;
@@ -17,6 +24,7 @@ type Process = { id: string; color: string; vruntime: number };
 
 export class ProcessScheduler {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private cpuCore: AnimatedRect;
   private readyQueue: QueueViz;
@@ -33,7 +41,7 @@ export class ProcessScheduler {
   constructor(container: HTMLElement, options?: ProcessSchedulerOptions) {
     this.container = container;
     this.algorithm = options?.algorithm ?? "round-robin";
-    this.quantum = options?.quantum ?? 1000;
+    this.quantum = normalizeQuantum(options?.quantum);
 
     const spawnBtn = document.createElement("button");
     spawnBtn.type = "button";
@@ -42,10 +50,13 @@ export class ProcessScheduler {
     algoBtn.type = "button";
     algoBtn.textContent = this.algorithm === "cfs" ? "CFS" : "Round-robin";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title:
         this.algorithm === "cfs" ? "CFS scheduler" : "Round-robin scheduler",
@@ -53,7 +64,7 @@ export class ProcessScheduler {
       canvasHeight: "320px",
       testId: "process-scheduler",
       themeName: options?.themeName,
-      headerActions: [algoBtn, spawnBtn],
+      headerActions: [algoBtn, spawnBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(spawnBtn, t, "secondary");
@@ -68,6 +79,16 @@ export class ProcessScheduler {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "VisLab widget",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "VisLab widget",
+    });
 
     this.cpuCore = new AnimatedRect("cpu", 300, 40, 150, 80);
     this.cpuCore.label = "CPU — idle";
@@ -190,6 +211,7 @@ export class ProcessScheduler {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

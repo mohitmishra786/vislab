@@ -1,11 +1,37 @@
 ---
-title: Sorting race
+title: Sort race
+description: Side-by-side sorting algorithm race for teaching comparisons
 ---
 
-import { SortRace } from '@vislab/react';
+import { SortRace } from "@vislab/react";
 
-<SortRace client:visible />
+Race common sorting algorithms on a shared input size for classroom-style intuition (not a scientific benchmark harness).
 
-``astro
-<SortRace client:visible />
-``
+**Maturity:** `flagship`
+
+## Live demo
+
+<figure>
+  <SortRace client:visible />
+  <figcaption>Sorting algorithms racing on animated arrays.</figcaption>
+</figure>
+
+## When to use
+
+Intro algorithms courses and blog posts comparing big-O intuition with visual motion.
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `arraySize` | `number` | yes | Number of bars |
+| `seed` | `number` | yes | Deterministic shuffle for tests/docs |
+| `themeName` | `string` | yes | Theme id |
+
+## Pedagogy notes
+
+Constant factors and language runtime dominate real benchmarks. Treat this as a **motivation** visual, not a benchmark.
+
+## Accessibility & SEO
+
+Figcaption required. SimClock controls and Static SVG export are in the chrome.

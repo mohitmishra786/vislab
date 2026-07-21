@@ -1,11 +1,61 @@
 ---
 title: B-tree ops
+description: B-tree ops systems visualization widget.
 ---
 
-import { BTreeOps } from '@vislab/react';
+import { BTreeOps } from "@vislab/react";
 
-<BTreeOps client:visible />
+B-tree ops systems visualization widget.
 
-``astro
-<BTreeOps client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <BTreeOps client:visible />
+  <figcaption>B-tree ops interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { BTreeOps } from "@vislab/react";
+---
+<figure>
+  <BTreeOps client:visible />
+  <figcaption>B-tree ops</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="BTreeOps" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="btree-ops" component="BTreeOps" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `btree-ops`
+- **globalName:** `BTreeOps`
+- **category:** `algorithms`
+- **custom element:** `<vislab-btree-ops>`

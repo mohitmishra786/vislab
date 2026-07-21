@@ -1,9 +1,27 @@
 {
   "name": "@vislab/core",
   "version": "0.0.0",
+  "description": "Zero-dependency canvas ECS engine, SimClock, primitives, and themes for VisLab systems visualizations",
+  "keywords": [
+    "vislab",
+    "canvas",
+    "ecs",
+    "simulation",
+    "simclock",
+    "systems-visualization",
+    "typescript"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
   "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",

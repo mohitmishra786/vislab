@@ -1,83 +1,142 @@
 <div align="center">
 
-# VisLab
+# VisLab Widgets
 
 _"Complexity is the enemy of understanding."_
 
-High-fidelity systems engineering visualizations for the modern web.
+**Embeddable systems & CS education simulations** for technical blogs and course sites — CPU pipelines, caches, schedulers, storage latency, and more.
 
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Monorepo](https://img.shields.io/badge/monorepo-turborepo-orange?style=flat-square)](https://turbo.build/)
-[![Aesthetic](https://img.shields.io/badge/style-planetscale-black?style=flat-square)](https://planetscale.com/blog/io-devices-and-latency)
+[![Status](https://img.shields.io/badge/status-pre--1.0-yellow?style=flat-square)](TODOS.md)
+
+**Demo / docs (after deploy):** [GitHub Pages](https://mohitmishra786.github.io/vislab) · **Source:** this monorepo
 
 </div>
 
+<p align="center">
+  <img src="docs/media/storage-comparison.png" alt="Storage latency race widget" width="720" />
+</p>
+<p align="center">
+  <img src="docs/media/cpu-pipeline.png" alt="CPU pipeline widget with SimClock controls" width="720" />
+</p>
+
 ---
+
+## Why VisLab Widgets?
+
+Technical writing often sits between **static diagrams** that miss temporal behavior and **video embeds** that are heavy and hard to scrub.
+
+VisLab ships **living canvas simulations** (Canvas 2D — not WebGL) with a shared `SimClock` (pause, 0.1×–10×), embeddable via React/MDX, static HTML, or Jekyll.
+
+Aesthetic: flat geometry, monospace (JetBrains Mono), no gradients — inspired by interactive systems explainers (e.g. PlanetScale’s latency essays), productized as a reusable widget registry.
+
+> **Name note:** Unrelated to university “VisLab” labs. Prefer **VisLab Widgets** in titles.
+
+## Status (read this)
+
+| Item | State |
+| ---- | ----- |
+| npm `@vislab/*` | **Not published yet** — use monorepo install |
+| GitHub Releases | Pending first `0.1.0` |
+| Bundle gzip | VisLab ≈ **20.5 KB** · Embeds ≈ **23 KB** (CI budgeted; SimClock+export chrome) |
+| Support | **Tier 1:** React + static HTML · **Tier 2:** Jekyll · **Tier 3:** Puppeteer exporter |
 
 ## Packages
 
-| Package                               | Version | Description                                                               |
-| :------------------------------------ | :------ | :------------------------------------------------------------------------ |
-| **@vislab/core**                      | `0.0.0` | Canvas engine, `SimClock`, primitives, themes                             |
-| **@vislab/components**                | `0.0.0` | Simulation classes (IIFE global **`VisLab`**)                             |
-| **@vislab/registry**                  | `0.0.0` | Single manifest for every widget (metadata + `create`)                    |
-| **@vislab/react**                     | `0.0.0` | React / MDX via `VislabMount` and named exports                           |
-| **@vislab/web-components**            | `0.0.0` | Embeds: custom elements, `[data-vislab]`, IIFE **`VisLabEmbeds`**         |
-| **@vislab/cli**                       | `0.2.0` | `vislab build`, `widget`, `preview`, `new`                                |
-| **@vislab/exporter**                  | `0.0.0` | Puppeteer PNG frame capture → GIF/MP4 tooling                             |
-| **vislab-jekyll** (gem)               | `0.1.0` | Jekyll layout + includes ([packages/jekyll-theme](packages/jekyll-theme)) |
-| **studio** / **docs** / **demo-blog** | —       | Astro apps: composer, registry docs, React demo                           |
+| Package | Version | Description |
+| :------ | :------ | :---------- |
+| **@vislab/core** | `0.0.0` | Canvas ECS, `SimClock`, primitives, themes (zero runtime deps) |
+| **@vislab/components** | `0.0.0` | 17 simulation widgets (IIFE `VisLab`) |
+| **@vislab/registry** | `0.0.0` | Single manifest + props schema + `create` |
+| **@vislab/react** | `0.0.0` | React / MDX via `VislabMount` + named exports |
+| **@vislab/web-components** | `0.0.0` | Custom elements, `[data-vislab]`, IIFE `VisLabEmbeds` |
+| **@vislab/cli** | `0.2.0` | `vislab build`, `widget`, `preview`, `new` |
+| **@vislab/exporter** | `0.0.0` | Optional Puppeteer frame capture (not needed for embeds) |
+| **vislab-jekyll** | `0.1.0` | Jekyll layout + includes |
 
----
+## Quick start (monorepo)
 
-Technical writing is often trapped between two extremes: static, lifeless diagrams that fail to capture temporal complexity, and heavyweight video embeds that hurt SEO and load times.
+```bash
+git clone https://github.com/mohitmishra786/vislab.git
+cd vislab
+# Node >= 22.12 required
+pnpm install
+pnpm run build
+pnpm run test
+```
 
-**VisLab** takes a different approach. It provides a lightweight, GPU-accelerated visualization engine designed specifically for systems engineering (CPU pipelines, cache hierarchies, storage latency, and OS internals).
+### React / Astro (workspace)
 
-The visuals are not just images—they are living simulations running at 60fps, mapped strictly to technical metrics.
+```tsx
+import { CpuPipeline, StorageComparison } from "@vislab/react";
 
-## The PlanetScale Aesthetic
+export function Demo() {
+  return (
+    <>
+      <StorageComparison />
+      <CpuPipeline stages={["IF", "ID", "EX", "MEM", "WB"]} />
+    </>
+  );
+}
+```
 
-_"Simplicity is the ultimate sophistication."_ — Leonardo da Vinci
+Astro: `<StorageComparison client:visible />`.
 
-VisLab follows a "PlanetScale-style" visual philosophy: bare-metal, retro, and unapologetically technical.
+### Static HTML
 
-- **Flat Geometry**: No gradients, no dropshadows, no "fluff". Just precise matte shapes.
-- **Strict Monospace**: Powered by `JetBrains Mono` for maximum legibility in technical contexts.
-- **Latency Logic**: Animations are not just "tweened"—they are simulated. A storage race between NVMe and HDD actually moves at relative speeds proportional to their physical latencies.
+```bash
+pnpm --filter @vislab/cli exec vislab build -o ./public/vislab
+```
 
-## What It Actually Does
+```html
+<script src="./vislab/vislab-embed.min.js" defer></script>
+<div data-vislab="CacheSimulator" style="min-height:400px"></div>
+```
 
-When you drop a VisLab component into your technical blog or documentation site, you aren't just showing a diagram. You are providing a playground:
+### Studio (Copy MDX)
 
-- **Storage Latency Comparison**: A horizontal race track showing the gargantuan gap between L1 cache, NVMe, and rotational HDDs.
-- **CPU Pipeline Simulation**: A granular look at instructions flowing through Fetch, Decode, and Execute stages.
-- **Cache Hierarchies**: Visualizing hits, misses, and evictions across L1/L2/L3 boundaries.
-- **Process Scheduling**: Interactive Gantt charts showing context switching and queue priorities in real-time.
+```bash
+pnpm --filter studio dev
+```
 
-## The Authoring Workflow
+Full paths: [docs/QUICKSTART.md](docs/QUICKSTART.md).
 
-VisLab is designed to work where technical writers work:
+## Flagship widgets
 
-1. **The CLI**: `pnpm --filter @vislab/cli exec vislab build` writes `vislab.min.js` + `vislab-embed.min.js`; `vislab widget -c CpuPipeline` emits iframe-ready HTML.
-2. **The Studio**: `pnpm --filter studio dev` — registry-driven picker, live preview, **Copy MDX** snippets.
-3. **The Adapters**: **React** (`@vislab/react`), **custom elements** + **`[data-vislab]`** (embed script), and **Jekyll** includes — all driven by `@vislab/registry`.
+1. **Storage latency race** — relative L1 / NVMe / SSD / HDD motion  
+2. **CPU pipeline** — stages + simplified hazards + SimClock  
+3. **Cache hierarchy** — L1/L2/L3, LRU vs FIFO  
+4. **Process scheduler** — RR / simplified CFS  
+5. **Sort race** — algorithm race visual  
 
-## Quickstart
-
-Copy-paste guides for **React/Astro**, **static HTML**, and **Jekyll**: [docs/QUICKSTART.md](docs/QUICKSTART.md).  
-Roadmap and open work: [TODOS.md](TODOS.md) · [GitHub Issues](https://github.com/mohitmishra786/vislab/issues).
+Plus 12 more in the registry (compiler, VM, graphs, …).
 
 ## Architecture
 
-- **Core Engine**: A custom entity-component-system (ECS) built purely on the HTML5 Canvas API. Zero external dependencies.
-- **SimClock**: A deterministic simulation clock that allows pausing, slowing down time (0.1x), or speeding up time (10x) for deep analysis.
-- **Monorepo Structure**: Managed via `pnpm` and `Turborepo` for rapid development and standardized builds.
+- **Core:** HTML5 Canvas 2D ECS, deterministic `SimClock`, zero runtime deps on `@vislab/core`
+- **Registry-first:** one manifest drives React, custom elements, CLI, Studio
+- **Monorepo:** pnpm + Turborepo; Biome lint; vitest; Playwright visual regression
 
-## Releases and versioning
+## Accessibility & SEO
 
-All npm packages use `0.x` until the public API stabilizes. Publish with `pnpm -r publish` from a clean `main` (after `pnpm run build` and `pnpm run test`). The Jekyll theme is versioned in `vislab-jekyll.gemspec`. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding a component via the registry.
+Canvas content is visual-only. Widgets expose chrome titles, button labels, `role="img"`, and a hidden text summary. **Authors must add figcaptions/prose** for screen readers and SEO. See docs on accessibility and SEO for embeds.
 
----
+## Compare
 
-MIT License
+| Tool | Use when |
+| ---- | -------- |
+| Mermaid | Diagrams as code |
+| Excalidraw | Freeform sketch |
+| **VisLab Widgets** | Systems **temporal** sims in your site |
+| Video | Narrative film — heavier |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Roadmap: [TODOS.md](TODOS.md). Security: [SECURITY.md](SECURITY.md). Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+Audit implementation progress: [audits/IMPLEMENTATION_LOG.md](audits/IMPLEMENTATION_LOG.md).
+
+## License
+
+MIT

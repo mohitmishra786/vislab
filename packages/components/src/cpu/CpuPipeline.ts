@@ -1,6 +1,12 @@
 import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
+import { detectDataHazard } from "./pipelineHazards";
 
 const DEFAULT_STAGES = ["IF", "ID", "EX", "MEM", "WB"];
 
@@ -27,6 +33,7 @@ export class CpuPipeline {
   private nextInstNum = 1;
   private stallLabel: Label | null = null;
   private running = false;
+  private runtime: WidgetRuntime | null = null;
 
   constructor(container: HTMLElement, options?: CpuPipelineOptions) {
     this.container = container;
@@ -35,40 +42,54 @@ export class CpuPipeline {
         ? options.stages
         : DEFAULT_STAGES;
 
-    const playBtn = document.createElement("button");
-    playBtn.type = "button";
-    playBtn.textContent = "Pause";
     const stepBtn = document.createElement("button");
     stepBtn.type = "button";
     stepBtn.textContent = "Step";
+    const clockHost = createClockHost();
 
     const {
       wrapper,
-      canvasMount,
+      prepareCanvas,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
       title: "CPU pipeline",
       variant: "diagram",
       canvasHeight: "200px",
       testId: "cpu-pipeline",
       themeName: options?.themeName,
-      headerActions: [playBtn, stepBtn],
+      headerActions: [clockHost, stepBtn],
+      summary: `Instruction pipeline stages: ${this.stages.join(" → ")}.`,
+      minWidth: "280px",
     });
 
-    styleVislabButton(playBtn, t, "primary");
     styleVislabButton(stepBtn, t, "secondary");
-    playBtn.setAttribute("aria-label", "Play or pause pipeline");
     stepBtn.setAttribute("aria-label", "Advance one pipeline cycle");
 
-    const canvas = document.createElement("canvas");
-    canvas.style.width = "100%";
-    canvas.style.height = "200px";
-    canvas.style.display = "block";
-    canvas.style.backgroundColor = t.bg;
-    canvasMount.appendChild(canvas);
+    const canvas = prepareCanvas({ height: "200px" });
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    const wantAuto = options?.autoPlay !== false && !reducedMotion;
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "CPU pipeline",
+      startPaused: !wantAuto,
+      onPauseChange: (paused) => {
+        this.running = !paused;
+        if (!paused) {
+          this.scheduleFetch();
+          this.scheduleAdvance();
+        }
+      },
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "CPU pipeline",
+    });
 
     const stageWidth = 64;
     const stageHeight = 44;
@@ -118,32 +139,23 @@ export class CpuPipeline {
     this.stallLabel.font = '11px "JetBrains Mono", monospace';
     this.scene.addEntity(this.stallLabel);
 
-    playBtn.addEventListener("click", () => {
-      if (this.running) {
-        this.scene.clock.pause();
-        this.running = false;
-        playBtn.textContent = "Play";
-      } else {
-        this.scene.clock.resume();
-        this.running = true;
-        playBtn.textContent = "Pause";
-      }
-    });
-
     stepBtn.addEventListener("click", () => {
       this.scene.clock.pause();
       this.running = false;
-      playBtn.textContent = "Play";
+      this.runtime?.clock.refresh();
       this.advancePipeline();
     });
 
     this.scene.start();
-    if (options?.autoPlay !== false) {
+    if (wantAuto) {
       this.running = true;
       this.scene.clock.speed = 1.5;
       this.scheduleFetch();
       this.scheduleAdvance();
     }
+    setSummary(
+      `CPU pipeline visualization with stages ${this.stages.join(", ")}. Use Pause/Play and speed controls; Step advances one cycle.`,
+    );
   }
 
   private scheduleAdvance() {
@@ -186,41 +198,41 @@ export class CpuPipeline {
   }
 
   private checkHazard() {
-    const exIdx = this.stages.findIndex(
-      (s) => s === "EX" || s.toUpperCase() === "EX",
+    const result = detectDataHazard(
+      this.stages,
+      this.instructions.map((i) => ({
+        id: i.id,
+        stageIndex: i.stageIndex,
+        label: i.label,
+      })),
     );
-    const memIdx = this.stages.findIndex(
-      (s) => s === "MEM" || s.toUpperCase() === "MEM",
-    );
-    if (exIdx < 0 || memIdx < 0) return;
-
-    const inEx = this.instructions.find((i) => i.stageIndex === exIdx);
-    const inMem = this.instructions.find((i) => i.stageIndex === memIdx);
-    if (inEx && inMem && inEx.label === inMem.label) {
-      if (this.stallLabel) {
-        this.stallLabel.text = "⚠ data hazard — stall bubble inserted";
-      }
-      const stall = new AnimatedRect(
-        `stall-${Date.now()}`,
-        this.stageCenters[exIdx].x - 10,
-        this.stageCenters[exIdx].y - 8,
-        20,
-        16,
-      );
-      stall.label = "⊘";
-      stall.fillColor = "#ef4444";
-      stall.strokeColor = "#f87171";
-      stall.labelColor = "#fff";
-      stall.labelFontPx = 12;
-      this.scene.addEntity(stall);
-      this.scene.scheduler.schedule({
-        id: `remove-stall-${stall.id}`,
-        triggerTime: this.scene.clock.simTime + 800,
-        execute: () => this.scene.removeEntity(stall.id),
-      });
-    } else if (this.stallLabel) {
-      this.stallLabel.text = "";
+    if (result.kind !== "data" || result.stallStageIndex === null) {
+      if (this.stallLabel) this.stallLabel.text = "";
+      return;
     }
+
+    const exIdx = result.stallStageIndex;
+    if (this.stallLabel) {
+      this.stallLabel.text = result.message;
+    }
+    const stall = new AnimatedRect(
+      `stall-${Date.now()}`,
+      this.stageCenters[exIdx].x - 10,
+      this.stageCenters[exIdx].y - 8,
+      20,
+      16,
+    );
+    stall.label = "⊘";
+    stall.fillColor = "#ef4444";
+    stall.strokeColor = "#f87171";
+    stall.labelColor = "#fff";
+    stall.labelFontPx = 12;
+    this.scene.addEntity(stall);
+    this.scene.scheduler.schedule({
+      id: `remove-stall-${stall.id}`,
+      triggerTime: this.scene.clock.simTime + 800,
+      execute: () => this.scene.removeEntity(stall.id),
+    });
   }
 
   private advancePipeline() {
@@ -242,6 +254,7 @@ export class CpuPipeline {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

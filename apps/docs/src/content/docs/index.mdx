@@ -1,18 +1,42 @@
 ---
-title: Introduction
-description: VisLab — high-fidelity systems engineering visualizations
+title: VisLab Widgets
+description: Embeddable systems & CS education canvas simulations for technical writing
 ---
 
-VisLab provides **17 interactive canvas widgets** for technical writing: CPU pipelines, cache hierarchies, OS schedulers, compilers, and algorithms.
+**VisLab Widgets** provides **17 interactive canvas simulations** for technical writing and CS education: CPU pipelines, cache hierarchies, OS schedulers, compilers, and algorithms.
 
-## Embed paths
+> Brand note: this project is unrelated to university “VisLab” research groups. Prefer the disambiguator **VisLab Widgets** in titles and links.
 
-- **React / Astro** — `@vislab/react` with `VislabMount` or named exports
-- **Static HTML** — `data-vislab` + `vislab-embed.min.js`
-- **Jekyll** — `vislab-jekyll` gem includes
+## Embed paths (support tiers)
+
+| Tier | Path | Status |
+| ---- | ---- | ------ |
+| 1 | **React / Astro MDX** — `@vislab/react` | Primary |
+| 1 | **Static HTML** — `data-vislab` + embed script | Primary |
+| 2 | **Jekyll** — `vislab-jekyll` gem | Best-effort |
+| 3 | **Exporter** — Puppeteer frames → GIF/MP4 | Optional tooling |
 
 All widgets are declared once in `@vislab/registry` and consumed by every adapter.
 
 ## Status
 
-VisLab is in active development — not yet published to npm. See the monorepo [README](https://github.com/mohitmishra786/vislab) and [roadmap](https://github.com/mohitmishra786/vislab/blob/main/TODOS.md).
+VisLab is **pre-1.0**. Packages may not yet be on npm — develop from the monorepo (`pnpm install && pnpm run build`) until the first `0.1.0` release. See the monorepo [README](https://github.com/mohitmishra786/vislab) and [roadmap](https://github.com/mohitmishra786/vislab/blob/main/TODOS.md).
+
+## Bundle size
+
+Measured gzip budgets (passed in CI):
+
+- VisLab IIFE ≈ **16 KB** gzip
+- VisLabEmbeds IIFE ≈ **19 KB** gzip
+
+## What it is not
+
+- Not a general diagramming tool (use Mermaid / Excalidraw)
+- Not a full CPU emulator — pedagogical simulations with intentional simplifications
+- Not GPU/WebGL — Canvas 2D deterministic animations
+
+## Next
+
+- [Quickstart](/quickstart/)
+- [Compare to Mermaid / Excalidraw / video](/compare/)
+- [Component gallery](/components/)

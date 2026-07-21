@@ -29,18 +29,29 @@ jobs:
     name: Dependabot alert summary
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Dependabot alerts REST API requires security-events (read).
+    # contents:read is required for repository context on GITHUB_TOKEN.
     permissions:
+      contents: read
       security-events: read
     steps:
       - name: List open Dependabot alerts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          count=$(gh api repos/${{ github.repository }}/dependabot/alerts?state=open --paginate -q 'length')
+          set +e
+          response=$(gh api "repos/${{ github.repository }}/dependabot/alerts?state=open&per_page=100" \
+            --paginate 2>&1)
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo "::warning::Dependabot alerts API inaccessible (HTTP/auth). Ensure Dependabot alerts are enabled for this repository and that the workflow token has security-events:read. pnpm audit job remains the hard gate."
+            echo "$response"
+            exit 0
+          fi
+          count=$(echo "$response" | jq -s 'add | length')
           echo "Open Dependabot alerts: $count"
           if [ "$count" -gt 0 ]; then
-            gh api "repos/${{ github.repository }}/dependabot/alerts?state=open&per_page=100" \
-              --paginate \
-              -q '.[] | "\(.number)\t\(.security_advisory.severity)\t\(.security_vulnerability.package.name)\t\(.security_vulnerability.first_patched_version.identifier // "none")"' \
+            echo "$response" | jq -s 'add | .[] | "\(.number)\t\(.security_advisory.severity)\t\(.security_vulnerability.package.name)\t\(.security_vulnerability.first_patched_version.identifier // "none")"' -r \
               | sort -t$'\t' -k2,2 -k1,1n
           fi

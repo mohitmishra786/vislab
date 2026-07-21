@@ -1,11 +1,62 @@
 ---
 title: Lexer
+description: Lexer systems visualization widget.
 ---
 
-import { Lexer } from '@vislab/react';
+import { Lexer } from "@vislab/react";
 
-<Lexer client:visible />
+Lexer systems visualization widget.
 
-``astro
-<Lexer client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <Lexer client:visible />
+  <figcaption>Lexer interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+| `source` | `string` | yes | Source code to tokenize |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { Lexer } from "@vislab/react";
+---
+<figure>
+  <Lexer client:visible />
+  <figcaption>Lexer</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="Lexer" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="lexer" component="Lexer" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `lexer`
+- **globalName:** `Lexer`
+- **category:** `compiler`
+- **custom element:** `<vislab-lexer>`

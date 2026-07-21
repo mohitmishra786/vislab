@@ -1,11 +1,61 @@
 ---
 title: CFG builder
+description: CFG builder systems visualization widget.
 ---
 
-import { CFGBuilder } from '@vislab/react';
+import { CFGBuilder } from "@vislab/react";
 
-<CFGBuilder client:visible />
+CFG builder systems visualization widget.
 
-``astro
-<CFGBuilder client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <CFGBuilder client:visible />
+  <figcaption>CFG builder interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { CFGBuilder } from "@vislab/react";
+---
+<figure>
+  <CFGBuilder client:visible />
+  <figcaption>CFG builder</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="CFGBuilder" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="cfg-builder" component="CFGBuilder" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `cfg-builder`
+- **globalName:** `CFGBuilder`
+- **category:** `compiler`
+- **custom element:** `<vislab-cfg-builder>`

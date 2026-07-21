@@ -1,9 +1,26 @@
 {
   "name": "@vislab/web-components",
   "version": "0.0.0",
+  "description": "Custom elements and data-vislab auto-mount embeds for VisLab widgets",
+  "keywords": [
+    "vislab",
+    "web-components",
+    "custom-elements",
+    "embed",
+    "canvas",
+    "systems-visualization"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "sideEffects": true,
   "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm,iife --global-name VisLabEmbeds --dts",

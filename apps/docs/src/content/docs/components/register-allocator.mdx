@@ -1,11 +1,61 @@
 ---
 title: Register allocation
+description: Register allocation systems visualization widget.
 ---
 
-import { RegisterAllocator } from '@vislab/react';
+import { RegisterAllocator } from "@vislab/react";
 
-<RegisterAllocator client:visible />
+Register allocation systems visualization widget.
 
-``astro
-<RegisterAllocator client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <RegisterAllocator client:visible />
+  <figcaption>Register allocation interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { RegisterAllocator } from "@vislab/react";
+---
+<figure>
+  <RegisterAllocator client:visible />
+  <figcaption>Register allocation</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="RegisterAllocator" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="register-allocator" component="RegisterAllocator" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `register-allocator`
+- **globalName:** `RegisterAllocator`
+- **category:** `compiler`
+- **custom element:** `<vislab-register-allocator>`

@@ -22,11 +22,14 @@ describe("vislabRegistry", () => {
     }
   });
 
-  it("createVislabComponent throws for unknown widget", () => {
+  it("createVislabComponent throws for unknown widget and paints alert", () => {
     const el = document.createElement("div");
     expect(() => createVislabComponent("NotAWidget", el)).toThrow(
       "Unknown VisLab component",
     );
+    const alert = el.querySelector("[data-vislab-error][role='alert']");
+    expect(alert).toBeTruthy();
+    expect(alert?.textContent).toMatch(/NotAWidget/);
   });
 });
 
@@ -39,10 +42,28 @@ describe("widget lifecycle", () => {
       expect(
         container.querySelector("[data-vislab-widget], canvas"),
       ).toBeTruthy();
+      // SimClock strip present on all widgets after runtime wiring
+      expect(container.querySelector("[data-vislab-simclock]")).toBeTruthy();
+      expect(container.querySelector('canvas[role="img"]')).toBeTruthy();
+      expect(container.querySelector("[data-vislab-summary]")).toBeTruthy();
       expect(() => widget.destroy()).not.toThrow();
+      // Full dispose: no leftover widget chrome or canvas
+      expect(container.innerHTML.trim()).toBe("");
+      expect(container.querySelector("canvas")).toBeNull();
+      expect(container.querySelector("[data-vislab-widget]")).toBeNull();
       container.remove();
     });
   }
+
+  it("every entry declares maturity", () => {
+    for (const entry of vislabRegistry) {
+      expect(entry.maturity === "flagship" || entry.maturity === "beta").toBe(
+        true,
+      );
+    }
+    const flagships = vislabRegistry.filter((e) => e.maturity === "flagship");
+    expect(flagships.length).toBe(5);
+  });
 });
 
 describe("prop parsing", () => {

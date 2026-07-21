@@ -2,6 +2,11 @@ import type { Theme } from "@vislab/core";
 import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type SortRaceOptions = {
   themeName?: string;
@@ -23,6 +28,7 @@ function seededShuffle(size: number, seed: number): number[] {
 
 export class SortRace {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private isSorting = false;
   private theme: Theme;
@@ -36,17 +42,20 @@ export class SortRace {
     startBtn.type = "button";
     startBtn.textContent = "Run race";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Sort race — bubble vs insertion vs quick",
       variant: "toolbar",
       canvasHeight: "300px",
       testId: "sort-race",
       themeName: options?.themeName,
-      headerActions: startBtn,
+      headerActions: [startBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(startBtn, t, "primary");
@@ -60,6 +69,16 @@ export class SortRace {
 
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Sort race — bubble vs insertion vs quick",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Sort race — bubble vs insertion vs quick",
+    });
 
     const data =
       options?.seed !== undefined
@@ -251,6 +270,7 @@ export class SortRace {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

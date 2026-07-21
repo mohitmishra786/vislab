@@ -12,7 +12,10 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm run build && changeset publish",
-    "check:bundle-size": "node scripts/check-bundle-size.mjs"
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
+    "docs:widgets": "node scripts/generate-widget-docs.mjs",
+    "sri": "node scripts/compute-sri.mjs",
+    "media:capture": "node scripts/capture-readme-media.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -33,7 +36,7 @@
       "devalue": ">=5.8.1",
       "esbuild": ">=0.28.1",
       "ip-address": ">=10.1.1",
-      "js-yaml": ">=4.2.0",
+      "js-yaml": "4.3.0",
       "postcss": ">=8.5.10",
       "vitest": ">=3.2.6",
       "ws": ">=8.21.0",

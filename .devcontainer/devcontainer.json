@@ -1,0 +1,21 @@
+{
+  "name": "VisLab",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install && pnpm run build",
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome", "esbenp.prettier-vscode"]
+    }
+  },
+  "forwardPorts": [4321, 4322, 4323],
+  "portsAttributes": {
+    "4321": { "label": "docs" },
+    "4322": { "label": "studio" },
+    "4323": { "label": "demo-blog" }
+  }
+}

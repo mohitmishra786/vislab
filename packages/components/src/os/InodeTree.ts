@@ -3,9 +3,15 @@ import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class InodeTree {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private nodes: Map<string, AnimatedRect> = new Map();
@@ -20,17 +26,20 @@ export class InodeTree {
     walkBtn.type = "button";
     walkBtn.textContent = "Resolve path";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Inode tree — path resolution",
       variant: "terminal",
       canvasHeight: "360px",
       testId: "inode-tree",
       themeName: options?.themeName,
-      headerActions: walkBtn,
+      headerActions: [walkBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(walkBtn, t, "secondary");
@@ -43,6 +52,16 @@ export class InodeTree {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Inode tree — path resolution",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Inode tree — path resolution",
+    });
 
     const defs = [
       { id: "root", x: 280, y: 40, label: "/ inode:2" },
@@ -87,6 +106,7 @@ export class InodeTree {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

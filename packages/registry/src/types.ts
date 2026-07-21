@@ -16,6 +16,8 @@ export type VislabCategory =
   | "compiler"
   | "storage";
 
+export type VislabMaturity = "flagship" | "beta";
+
 export interface VislabComponentEntry {
   /** Stable id, e.g. cpu-pipeline */
   id: string;
@@ -24,6 +26,11 @@ export interface VislabComponentEntry {
   displayName: string;
   category: VislabCategory;
   description?: string;
+  /**
+   * Product maturity for Studio badges and docs.
+   * flagship = full docs + SimClock polish; beta = works, thinner docs.
+   */
+  maturity?: VislabMaturity;
   /** Custom element tag (must contain a hyphen) */
   customElementTag: string;
   props?: VislabPropSchema[];
@@ -32,3 +39,11 @@ export interface VislabComponentEntry {
     props?: Record<string, unknown>,
   ) => VislabWidget;
 }
+
+export const FLAGSHIP_IDS = [
+  "storage-comparison",
+  "cpu-pipeline",
+  "cache-simulator",
+  "process-scheduler",
+  "sort-race",
+] as const;

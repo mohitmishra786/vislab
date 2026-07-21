@@ -1,5 +1,10 @@
 import type { Theme } from "@vislab/core";
 import { resolveTheme } from "@vislab/core";
+import {
+  createSrOnlySummary,
+  decorateCanvasA11y,
+  prefersReducedMotion,
+} from "./a11y";
 
 export type ArticleChromeVariant =
   | "article"
@@ -21,23 +26,60 @@ export type ArticleChromeOptions = {
   testId?: string;
   /** Optional controls on the right side of the header (toolbar / terminal). */
   headerActions?: HTMLElement | HTMLElement[];
+  /**
+   * Initial accessible description of the visualization
+   * (screen readers + crawlable text). Update via setSummary().
+   */
+  summary?: string;
+  /** Minimum content width before horizontal scroll (CSS). */
+  minWidth?: string;
+};
+
+export type ArticleChrome = {
+  wrapper: HTMLElement;
+  header: HTMLElement;
+  canvasMount: HTMLElement;
+  theme: Theme;
+  titleId: string;
+  summaryId: string;
+  /** Update the SR/crawlable text summary of the simulation. */
+  setSummary: (text: string) => void;
+  /**
+   * Create a canvas with role=img, resize styles, and a11y labels.
+   * Appends into canvasMount.
+   */
+  prepareCanvas: (opts?: {
+    height?: string;
+    minWidth?: string;
+    backgroundColor?: string;
+  }) => HTMLCanvasElement;
+  /** Whether prefers-reduced-motion is active. */
+  reducedMotion: boolean;
 };
 
 /**
- * Shared embed frame: header + canvas region.
+ * Shared embed frame: header + canvas region + a11y summary.
  * - `diagram` — compact schematic (pipelines).
  * - `toolbar` — balanced header + actions + canvas (caches, sorts).
  * - `terminal` — left accent rail, IDE-ish (lexer, schedulers).
  * - `article` — roomy (storage-style).
  */
-export function createArticleChrome(options: ArticleChromeOptions): {
-  wrapper: HTMLElement;
-  header: HTMLElement;
-  canvasMount: HTMLElement;
-  theme: Theme;
-} {
+export function createArticleChrome(
+  options: ArticleChromeOptions,
+): ArticleChrome {
   const t = resolveTheme(options.themeName ?? "dark-premium");
   const variant = options.variant ?? "article";
+  const reducedMotion = prefersReducedMotion();
+  // Non-security DOM ids only — prefer crypto when available (CodeQL: insecure randomness)
+  const rand =
+    typeof crypto !== "undefined" && "getRandomValues" in crypto
+      ? Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) =>
+          b.toString(16).padStart(2, "0"),
+        ).join("")
+      : `${Date.now().toString(36)}${performance.now().toString(36).replace(".", "")}`;
+  const uid = `vislab-${(options.testId ?? "widget").replace(/\s+/g, "-")}-${rand}`;
+  const titleId = `${uid}-title`;
+  const summaryId = `${uid}-summary`;
 
   const defaultHeights: Record<ArticleChromeVariant, string> = {
     article: "280px",
@@ -57,6 +99,8 @@ export function createArticleChrome(options: ArticleChromeOptions): {
   wrapper.style.color = t.fg;
   wrapper.style.border = `1px solid ${t.border}`;
   wrapper.style.maxWidth = "100%";
+  wrapper.style.minWidth = "0";
+  wrapper.style.position = "relative";
 
   if (variant === "diagram" || variant === "toolbar") {
     wrapper.style.borderRadius = "6px";
@@ -77,24 +121,40 @@ export function createArticleChrome(options: ArticleChromeOptions): {
   header.style.alignItems = "center";
   header.style.borderBottom = `1px solid ${t.border}`;
   header.style.gap = "10px";
-  header.style.flexWrap = "wrap";
+  // Keep a single header row so titles (e.g. "B-tree search") stay visible
+  // and snapshot height is stable across Mac/Linux font metrics.
+  header.style.flexWrap = "nowrap";
+  header.style.overflow = "hidden";
 
+  // Fixed header heights (not min-height) so full-widget screenshots match across OS
   if (variant === "diagram") {
-    header.style.padding = "6px 10px";
+    header.style.padding = "0 10px";
+    header.style.height = "40px";
+    header.style.boxSizing = "border-box";
   } else if (variant === "toolbar") {
-    header.style.padding = "10px 14px";
+    header.style.padding = "0 14px";
+    header.style.height = "48px";
+    header.style.boxSizing = "border-box";
   } else if (variant === "terminal") {
-    header.style.padding = "8px 12px";
+    header.style.padding = "0 12px";
+    header.style.height = "44px";
+    header.style.boxSizing = "border-box";
     header.style.backgroundColor = "#080808";
   } else {
-    header.style.padding = "20px 24px";
+    header.style.padding = "0 24px";
+    header.style.height = "56px";
+    header.style.boxSizing = "border-box";
   }
 
   const titleEl = document.createElement("h3");
+  titleEl.id = titleId;
   titleEl.textContent = options.title;
   titleEl.style.margin = "0";
   titleEl.style.flex = "1";
   titleEl.style.minWidth = "0";
+  titleEl.style.whiteSpace = "nowrap";
+  titleEl.style.overflow = "hidden";
+  titleEl.style.textOverflow = "ellipsis";
 
   if (variant === "diagram") {
     titleEl.style.fontSize = "12px";
@@ -123,9 +183,10 @@ export function createArticleChrome(options: ArticleChromeOptions): {
   if (options.headerActions) {
     const box = document.createElement("div");
     box.style.display = "flex";
-    box.style.gap = "8px";
+    box.style.gap = "6px";
     box.style.alignItems = "center";
     box.style.flexShrink = "0";
+    box.style.flexWrap = "nowrap";
     const nodes = Array.isArray(options.headerActions)
       ? options.headerActions
       : [options.headerActions];
@@ -137,9 +198,17 @@ export function createArticleChrome(options: ArticleChromeOptions): {
 
   wrapper.appendChild(header);
 
+  const summaryText =
+    options.summary ??
+    `${options.title}. Interactive canvas simulation. Surrounding prose should describe the concept for screen reader users.`;
+  const summaryEl = createSrOnlySummary(summaryText);
+  summaryEl.id = summaryId;
+  wrapper.appendChild(summaryEl);
+
   const canvasWrap = document.createElement("div");
   canvasWrap.style.position = "relative";
   canvasWrap.style.backgroundColor = variant === "terminal" ? "#050505" : t.bg;
+  canvasWrap.style.overflowX = "auto";
 
   if (variant === "diagram") {
     canvasWrap.style.padding = "6px 8px 8px";
@@ -155,12 +224,82 @@ export function createArticleChrome(options: ArticleChromeOptions): {
   canvasMount.setAttribute("data-vislab-canvas", "");
   canvasMount.style.width = "100%";
   canvasMount.style.minHeight = canvasH;
-  if (variant === "toolbar") {
-    canvasMount.style.overflowX = "auto";
+  if (options.minWidth) {
+    canvasMount.style.minWidth = options.minWidth;
+  } else if (variant === "toolbar") {
+    canvasMount.style.minWidth = "320px";
   }
 
   canvasWrap.appendChild(canvasMount);
   wrapper.appendChild(canvasWrap);
 
-  return { wrapper, header, canvasMount, theme: t };
+  const setSummary = (text: string) => {
+    summaryEl.textContent = text;
+  };
+
+  const a11yOpts = {
+    label: options.title,
+    labelledBy: titleId,
+    descriptionId: summaryId,
+  };
+
+  // Auto-decorate any canvas appended into canvasMount (sync — works in happy-dom tests)
+  const nativeAppend = canvasMount.appendChild.bind(canvasMount);
+  canvasMount.appendChild = (<T extends Node>(node: T): T => {
+    const result = nativeAppend(node);
+    if (node instanceof HTMLCanvasElement) {
+      decorateCanvasA11y(node, a11yOpts);
+    } else if (node instanceof HTMLElement) {
+      node
+        .querySelectorAll("canvas")
+        .forEach((c) => decorateCanvasA11y(c, a11yOpts));
+    }
+    return result;
+  }) as typeof canvasMount.appendChild;
+
+  if (typeof MutationObserver !== "undefined") {
+    const obs = new MutationObserver((records) => {
+      for (const rec of records) {
+        rec.addedNodes.forEach((node) => {
+          if (node instanceof HTMLCanvasElement) {
+            decorateCanvasA11y(node, a11yOpts);
+          } else if (node instanceof HTMLElement) {
+            node
+              .querySelectorAll("canvas")
+              .forEach((c) => decorateCanvasA11y(c, a11yOpts));
+          }
+        });
+      }
+    });
+    obs.observe(canvasMount, { childList: true, subtree: true });
+  }
+
+  const prepareCanvas = (opts?: {
+    height?: string;
+    minWidth?: string;
+    backgroundColor?: string;
+  }): HTMLCanvasElement => {
+    const canvas = document.createElement("canvas");
+    const h = opts?.height ?? canvasH;
+    canvas.style.width = "100%";
+    canvas.style.height = h;
+    canvas.style.display = "block";
+    canvas.style.backgroundColor = opts?.backgroundColor ?? t.bg;
+    if (opts?.minWidth) canvas.style.minWidth = opts.minWidth;
+    decorateCanvasA11y(canvas, a11yOpts);
+    canvasMount.appendChild(canvas);
+    return canvas;
+  };
+
+  return {
+    wrapper,
+    header,
+    canvasMount,
+    theme: t,
+    titleId,
+    summaryId,
+    setSummary,
+    prepareCanvas,
+    reducedMotion,
+  };
 }

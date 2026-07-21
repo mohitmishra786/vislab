@@ -45,6 +45,8 @@ PLANS.md
 *.webp
 *.png
 !apps/demo-blog/e2e/visual.spec.ts-snapshots/*.png
+!docs/media/*.png
+!apps/docs/public/*.png
 .gemini/
 brain/
 scratch/

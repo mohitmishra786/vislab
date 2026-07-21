@@ -25,13 +25,35 @@ Packages are published as `@vislab/*` on npm; the Jekyll theme is released as th
 
 ## Visual regression
 
-Widget screenshots live in `apps/demo-blog/e2e/visual.spec.ts-snapshots/`. CI runs them via Playwright after `astro build`.
+Full-widget screenshots (title chrome + controls + canvas) live in
+`apps/demo-blog/e2e/visual.spec.ts-snapshots/`.
 
-Update baselines after intentional UI changes:
+Baselines are **platform-tagged** so quality stays high on each host:
+
+- `*-chromium-darwin.png` — local macOS
+- `*-chromium-linux.png` — GitHub Actions Ubuntu (required for CI)
+
+Update after intentional UI changes:
 
 ```bash
+# On your Mac (darwin baselines)
 pnpm --filter demo-blog run build
-pnpm --filter demo-blog exec playwright test e2e/visual.spec.ts --update-snapshots
+pnpm --filter demo-blog exec playwright test e2e/visual.spec.ts --project=chromium --update-snapshots
+
+# Linux baselines for CI (Docker; from monorepo root)
+bash scripts/update-visual-snapshots-linux.sh
 ```
 
-Commit the changed PNG files with your widget PR.
+Commit **both** darwin and linux PNGs with your widget PR.
+
+## Docs & media helpers
+
+```bash
+pnpm run docs:widgets    # regenerate component MDX from registry (preserves hand-flagship pages)
+pnpm run sri             # write docs/SRI.md integrity hashes after build
+pnpm run media:capture   # README/OG stills into docs/media/ (needs demo-blog build + chromium)
+```
+
+## Widget runtime (SimClock + Static export)
+
+All widgets should use `attachWidgetRuntime` from `packages/components/src/ui/widgetRuntime.ts` after `new Scene(canvas)` so pause/speed controls, reduced-motion defaults, and SVG a11y export stay consistent.

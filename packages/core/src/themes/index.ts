@@ -31,12 +31,12 @@ export const themes: Record<string, Theme> = {
   "light-academic": {
     bg: "#ffffff",
     surface: "#e2e8f0",
-    border: "#cbd5e1",
-    fg: "#334155",
-    accent1: "#0ea5e9",
-    accent2: "#10b981",
-    accent3: "#ef4444",
-    accent4: "#8b5cf6",
+    border: "#64748b", // stronger border for WCAG chrome contrast
+    fg: "#0f172a", // slate-900 — body text on white
+    accent1: "#0369a1", // sky-700 — links/controls on white
+    accent2: "#047857", // emerald-700
+    accent3: "#b91c1c", // red-700
+    accent4: "#6d28d9", // violet-700
     font: '"JetBrains Mono", "Courier New", monospace',
     monoFont: '"JetBrains Mono", "Courier New", monospace',
   },

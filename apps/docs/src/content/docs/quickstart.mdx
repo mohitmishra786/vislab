@@ -1,26 +1,50 @@
 ---
 title: Quickstart
+description: Install and embed VisLab Widgets from the monorepo or (after publish) npm
 ---
 
 import { StorageComparison } from "@vislab/react";
 
-## React / Astro
+## Prerequisites
+
+- Node.js **≥ 22.12**
+- pnpm 10+
+
+## Status: monorepo first
+
+Until `@vislab/*` is published to npm, clone and build:
 
 ```bash
-pnpm add @vislab/react
+git clone https://github.com/mohitmishra786/vislab.git
+cd vislab && pnpm install && pnpm run build
 ```
+
+## React / Astro
 
 ```astro
 ---
 import { StorageComparison } from "@vislab/react";
 ---
-<StorageComparison client:visible />
+<figure>
+  <StorageComparison client:visible />
+  <figcaption>Relative storage-tier latency race.</figcaption>
+</figure>
 ```
+
+`client:visible` avoids hydrating off-screen islands (recommended).
 
 ## Live preview
 
 <StorageComparison client:visible />
 
-## More paths
+## Other paths
 
-See the monorepo [docs/QUICKSTART.md](https://github.com/mohitmishra786/vislab/blob/main/docs/QUICKSTART.md) for HTML and Jekyll snippets.
+Full HTML and Jekyll snippets: monorepo [`docs/QUICKSTART.md`](https://github.com/mohitmishra786/vislab/blob/main/docs/QUICKSTART.md) and the [HTML](/guides/html/) / [Jekyll](/guides/jekyll/) guides.
+
+## Studio (Copy MDX)
+
+```bash
+pnpm --filter studio dev
+```
+
+Pick a widget, set props, copy MDX / HTML / Jekyll / iframe snippets. See [Studio guide](/guides/studio/).

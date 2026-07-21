@@ -1,6 +1,11 @@
 import { AnimatedRect, Scene } from "@vislab/core";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export type StorageComparisonOptions = {
   themeName?: string;
@@ -10,6 +15,7 @@ export type StorageComparisonOptions = {
 export class StorageComparison {
   private scene: Scene;
   private container: HTMLElement;
+  private runtime: WidgetRuntime | null = null;
 
   constructor(container: HTMLElement, options?: StorageComparisonOptions) {
     this.container = container;
@@ -18,28 +24,41 @@ export class StorageComparison {
     timeIOBtn.type = "button";
     timeIOBtn.textContent = "Trigger I/O";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
-      canvasMount,
+      prepareCanvas,
       theme: t,
+      reducedMotion,
+      setSummary,
     } = createArticleChrome({
-      title: "IO devices and latency",
+      title: "Storage latency race",
       variant: "article",
       canvasHeight: "400px",
       testId: "storage-comparison",
       themeName: options?.themeName,
-      headerActions: timeIOBtn,
+      headerActions: [timeIOBtn, clockHost],
+      summary:
+        "Relative latency race across L1 cache, NVMe, SSD, and HDD tiers. Faster tiers finish sooner.",
+      minWidth: "280px",
     });
 
     styleVislabButton(timeIOBtn, t, "ghost");
 
-    const canvas = document.createElement("canvas");
-    canvas.style.width = "100%";
-    canvas.style.height = "400px";
-    canvas.style.display = "block";
-    canvasMount.appendChild(canvas);
+    const canvas = prepareCanvas({ height: "400px" });
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Storage latency race",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Storage latency race",
+    });
 
     const cpuBlock = new AnimatedRect("cpu", 50, 50, 150, 300);
     cpuBlock.fillColor = t.surface;
@@ -174,10 +193,14 @@ export class StorageComparison {
     if (options?.speed) {
       this.scene.clock.speed = Math.max(0.1, Math.min(10, options.speed));
     }
+    setSummary(
+      "Relative latency race: L1 cache, NVMe, SSD, and HDD tokens travel at speeds proportional to typical access latency.",
+    );
     this.scene.start();
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

@@ -3,9 +3,15 @@ import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class SyscallTrace {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private traceArrow: Arrow;
@@ -20,17 +26,20 @@ export class SyscallTrace {
     syscallBtn.type = "button";
     syscallBtn.textContent = "write() syscall";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Syscall trace — user → kernel",
       variant: "terminal",
       canvasHeight: "340px",
       testId: "syscall-trace",
       themeName: options?.themeName,
-      headerActions: syscallBtn,
+      headerActions: [syscallBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(syscallBtn, t, "primary");
@@ -43,6 +52,16 @@ export class SyscallTrace {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Syscall trace — user → kernel",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Syscall trace — user → kernel",
+    });
 
     this.userSpace = new AnimatedRect("uspace", 40, 40, 520, 90);
     this.userSpace.label = "User space (Ring 3)";
@@ -135,6 +154,7 @@ export class SyscallTrace {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }

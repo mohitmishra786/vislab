@@ -1,11 +1,61 @@
 ---
 title: TLB / page walk
+description: TLB / page walk systems visualization widget.
 ---
 
-import { TLBWalk } from '@vislab/react';
+import { TLBWalk } from "@vislab/react";
 
-<TLBWalk client:visible />
+TLB / page walk systems visualization widget.
 
-``astro
-<TLBWalk client:visible />
-``
+**Maturity:** `beta` — works end-to-end; pedagogy docs thinner than flagships.
+
+## Live demo
+
+<figure>
+  <TLBWalk client:visible />
+  <figcaption>TLB / page walk interactive simulation.</figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Optional | Description |
+| ---- | ---- | -------- | ----------- |
+| `themeName` | `string` | yes | Theme id, e.g. "dark-premium" |
+
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { TLBWalk } from "@vislab/react";
+---
+<figure>
+  <TLBWalk client:visible />
+  <figcaption>TLB / page walk</figcaption>
+</figure>
+```
+
+### HTML
+
+```html
+<div data-vislab="TLBWalk" style="min-height:320px;width:100%"></div>
+```
+
+### Jekyll
+
+```liquid
+{% include vislab.html id="tlb-walk" component="TLBWalk" %}
+```
+
+## Accessibility & SEO
+
+Canvas is visual-only. Use a figcaption and surrounding prose. Controls include SimClock (pause / 0.1× / 1× / 10×) and a **Static** SVG export for a text+snapshot twin.
+
+## Registry
+
+- **id:** `tlb-walk`
+- **globalName:** `TLBWalk`
+- **category:** `cpu`
+- **custom element:** `<vislab-tlb-walk>`

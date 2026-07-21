@@ -1,11 +1,29 @@
 ---
 title: Process scheduler
+description: Round-robin and simplified CFS-style scheduling with a Gantt strip
 ---
 
-import { ProcessScheduler } from '@vislab/react';
+import { ProcessScheduler } from "@vislab/react";
 
-<ProcessScheduler client:visible />
+Spawn processes and switch between **round-robin** and a simplified **CFS** (min vruntime) selection. Quantum is configurable.
 
-``astro
-<ProcessScheduler client:visible />
-``
+## Live demo
+
+<figure>
+  <ProcessScheduler client:visible />
+  <figcaption>
+    Process scheduler with ready queue and Gantt-style bars.
+  </figcaption>
+</figure>
+
+## Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `algorithm` | `"round-robin" \| "cfs"` | `round-robin` | Selection policy |
+| `quantum` | `number` | `1000` | Time slice (sim ms, clamped 100–10000) |
+| `themeName` | `string` | `dark-premium` | Theme id |
+
+## Pedagogy notes
+
+Not Linux CFS. Equal weight, no nice values, no sleepers. Use for intuition only.

@@ -1,9 +1,58 @@
 ---
 title: CPU pipeline
+description: Instruction flow through pipeline stages with simplified hazard detection
 ---
 
 import { CpuPipeline } from "@vislab/react";
 
-Instruction flow with hazard detection.
+Instruction bubbles flow through configurable stages (default IF → ID → EX → MEM → WB). A simplified data-hazard detector can insert stall bubbles when EX and MEM share a label.
 
-<CpuPipeline client:visible autoPlay={true} />
+## Live demo
+
+<figure>
+  <CpuPipeline client:visible autoPlay={true} />
+  <figcaption>
+    Five-stage CPU pipeline. Pause / speed controls and Step advance one cycle.
+  </figcaption>
+</figure>
+
+## When to use
+
+Explaining pipelining, stalls, or multi-stage instruction flow in systems or architecture posts.
+
+## Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `stages` | `string[]` | `IF,ID,EX,MEM,WB` | Stage labels |
+| `autoPlay` | `boolean` | `true` | Start animating (respects reduced motion) |
+| `themeName` | `string` | `dark-premium` | Theme id |
+
+## Snippets
+
+### MDX / Astro
+
+```astro
+---
+import { CpuPipeline } from "@vislab/react";
+---
+<CpuPipeline client:visible stages={["IF","ID","EX","MEM","WB"]} />
+```
+
+### HTML
+
+```html
+<div
+  data-vislab="CpuPipeline"
+  data-props='{"stages":["IF","ID","EX","MEM","WB"]}'
+  style="min-height:200px"
+></div>
+```
+
+## Pedagogy notes
+
+This is **not** a cycle-accurate CPU model. Hazard detection is intentionally simplified for teaching intuition. Cite a textbook or course notes alongside for rigorous definitions.
+
+## Accessibility
+
+Surround with a figcaption. Canvas has `role="img"` and a hidden summary; controls are keyboard-accessible.

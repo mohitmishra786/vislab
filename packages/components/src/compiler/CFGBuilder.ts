@@ -3,9 +3,15 @@ import { AnimatedRect, Arrow, Label, Scene } from "@vislab/core";
 import type { VislabWidgetOptions } from "../types";
 import { createArticleChrome } from "../ui/articleChrome";
 import { styleVislabButton } from "../ui/vislabButtons";
+import {
+  type WidgetRuntime,
+  attachWidgetRuntime,
+  createClockHost,
+} from "../ui/widgetRuntime";
 
 export class CFGBuilder {
   private scene: Scene;
+  private runtime: WidgetRuntime | null = null;
   private container: HTMLElement;
   private theme: Theme;
   private blocks: AnimatedRect[] = [];
@@ -19,17 +25,20 @@ export class CFGBuilder {
     stepBtn.type = "button";
     stepBtn.textContent = "Trace path";
 
+    const clockHost = createClockHost();
+
     const {
       wrapper,
       canvasMount,
       theme: t,
+      reducedMotion,
     } = createArticleChrome({
       title: "Control-flow graph",
       variant: "diagram",
       canvasHeight: "300px",
       testId: "cfg-builder",
       themeName: options?.themeName,
-      headerActions: stepBtn,
+      headerActions: [stepBtn, clockHost],
     });
     this.theme = t;
     styleVislabButton(stepBtn, t, "primary");
@@ -42,6 +51,16 @@ export class CFGBuilder {
     canvasMount.appendChild(canvas);
     this.container.appendChild(wrapper);
     this.scene = new Scene(canvas);
+    this.runtime = attachWidgetRuntime(this.scene, t, {
+      wrapper,
+      clockHost,
+      reducedMotion,
+      canvas,
+      title: "Control-flow graph",
+      getSummary: () =>
+        wrapper.querySelector("[data-vislab-summary]")?.textContent ??
+        "Control-flow graph",
+    });
 
     const defs = [
       { id: "bb0", x: 280, y: 40, label: "BB0 Entry" },
@@ -84,6 +103,7 @@ export class CFGBuilder {
   }
 
   public destroy() {
+    this.runtime?.dispose();
     this.scene.dispose();
     this.container.innerHTML = "";
   }
