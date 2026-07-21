@@ -31,10 +31,10 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "happy-dom": "^20.8.9",
+    "happy-dom": "^20.11.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.7"
   },
   "dependencies": {
     "@vislab/core": "workspace:*"
