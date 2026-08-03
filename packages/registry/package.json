@@ -28,7 +28,7 @@
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^3.2.7",
-    "happy-dom": "^20.11.0"
+    "happy-dom": "^20.11.1"
   },
   "publishConfig": {
     "access": "public"
