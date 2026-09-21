@@ -8,12 +8,12 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.3",
-    "@astrojs/react": "^6.0.1",
+    "@astrojs/starlight": "^0.42.2",
+    "@astrojs/react": "^6.0.6",
     "@vislab/react": "workspace:*",
     "@vislab/registry": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "astro": "^7.1.0"
+    "astro": "^7.3.3"
   }
 }
